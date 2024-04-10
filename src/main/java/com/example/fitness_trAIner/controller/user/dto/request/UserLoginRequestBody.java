@@ -4,7 +4,7 @@ import lombok.*;
 
 
 @Getter
-@Setter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserLoginRequestBody {
     private String username;
     private String password;

@@ -1,17 +1,14 @@
-package com.example.fitness_trAIner.controller.user.dto.request;
+package com.example.fitness_trAIner.service.admin.dto.request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-public class UserRequestBody {
-
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class AdminServiceLoginRequest {
     private String username;
     private String password;
-    private String nickname;
-
 }

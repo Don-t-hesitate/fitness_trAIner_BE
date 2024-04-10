@@ -1,6 +1,7 @@
 package com.example.fitness_trAIner.common.exception;
 
 import com.example.fitness_trAIner.common.exception.exceptions.LoginFailException;
+import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
 import com.example.fitness_trAIner.common.exception.exceptions.SignupFailException;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -44,13 +45,14 @@ public class ExceptionController {
         return makeResponse(e.getMessage(), 301);
     }
 
-//    @ExceptionHandler({SQLIntegrityConstraintViolationException.class})
-//    public final ResponseEntity<GlobalExceptionResponse> test(final SQLIntegrityConstraintViolationException e) {
-//        log.error("잘못된 SQL작성", e);
-//        ErrorCode errorCode = ErrorCode.A_ERROR;
-//        final GlobalExceptionResponse response = new GlobalExceptionResponse(errorCode.getMessage(), errorCode.getStatus());
-//        return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));
-//    }
+    @ExceptionHandler({NoUserException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse noUserCaseException(final NoUserException e) {
+        log.error("사용자를 찾을 수 없음 오류", e);
+        return makeResponse(e.getMessage(), 301);
+    }
+
+
 
 
     private GlobalExceptionResponse<String> makeResponse(String message, int status) {

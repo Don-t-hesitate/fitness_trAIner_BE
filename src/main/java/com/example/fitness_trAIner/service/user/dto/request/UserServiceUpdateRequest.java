@@ -1,14 +1,15 @@
-package com.example.fitness_trAIner.service.user.dto.response;
+package com.example.fitness_trAIner.service.user.dto.request;
 
-
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 @Builder
 @Getter
-@Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserServiceDetailInfoResponse {
-    private String username;
+public class UserServiceUpdateRequest {
+    private Long id;
     private String nickname;
     private Integer height;
     private Integer weight;

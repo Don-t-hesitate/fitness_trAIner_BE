@@ -12,16 +12,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
 public class WorkOutServiceImp implements WorkOutService {
-    private String uploadDir = "./src/movie";
+    private String uploadDir = "./src/video";
 
     @Override
     public void fileUpload(MultipartFile file) {
-        Path copyOfLocation = Paths.get(uploadDir + File.separator + StringUtils.cleanPath(file.getOriginalFilename()));
+        String randomName = UUID.randomUUID().toString();
+        Path copyOfLocation = Paths.get(uploadDir + File.separator + StringUtils.cleanPath(randomName));
+
+
         System.out.println("fileUpload 들어왔음");
         try{
             System.out.println("file경로 " + copyOfLocation.toString());
