@@ -14,8 +14,8 @@ public class GlobalResponse<T> {
     private final boolean success = true;
     @Schema(description = "API 호출 메시지", example ="{URL명} API 호출 성공")
     private String message;
-    private T result;
 
+    private T result;
     @Builder
     private GlobalResponse(String message, T result) {
         this.message = message;

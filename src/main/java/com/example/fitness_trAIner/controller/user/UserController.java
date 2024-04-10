@@ -4,9 +4,12 @@ import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.controller.user.dto.request.UserLoginRequestBody;
 import com.example.fitness_trAIner.controller.user.dto.request.UserSignupRequestBody;
+import com.example.fitness_trAIner.controller.user.dto.request.UserUpdateRequestBody;
 import com.example.fitness_trAIner.service.user.UserService;
 import com.example.fitness_trAIner.service.user.dto.request.UserServiceLoginRequest;
 import com.example.fitness_trAIner.service.user.dto.request.UserServiceSignupRequest;
+import com.example.fitness_trAIner.service.user.dto.request.UserServiceUpdateRequest;
+import com.example.fitness_trAIner.service.user.dto.response.UserServiceDetailInfoResponse;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceLoginResponse;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceSignupResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +52,7 @@ public class UserController {
                         .build()))
                 .build();
     }
+
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "유저 로그인 API")
     public final GlobalResponse<UserServiceLoginResponse> loginUser(@RequestBody UserLoginRequestBody requestBody) {
@@ -56,24 +60,55 @@ public class UserController {
         return GlobalResponse.<UserServiceLoginResponse>builder()
                 .message("유저 로그인")
                 .result(userService.loginUser(UserServiceLoginRequest.builder()
-                                .username(requestBody.getUsername())
-                                .password(requestBody.getPassword())
+                        .username(requestBody.getUsername())
+                        .password(requestBody.getPassword())
                         .build()))
                 .build();
     }
 
-//    @GetMapping()
-//    @Operation(summary = "유저 조회", description = "유저 조회")
-//    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
-//    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-//    public final GlobalResponse<UserServiceDetailInfoResponse> findById(@RequestBody UserRequestBody request) {
-//        return GlobalResponse.<UserServiceDetailInfoResponse>builder()
-//                .message("유저 상세 조회")
-//                .result(UserServiceDetailInfoResponse.builder()
-//                        .name(request.getName())
-//                        .build())
-//                .build();
-//
-//    }
+    @GetMapping("/{id}")
+    @Operation(summary = "아이디로 유저 조회", description = "유저 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<UserServiceDetailInfoResponse> findById(@PathVariable Long id) {
+        return GlobalResponse.<UserServiceDetailInfoResponse>builder()
+                .message("유저 상세 조회")
+                .result(userService.findById(id))
+                .build();
+    }
+
+    @PutMapping()
+    @Operation(summary = "사용자 정보 수정", description = "유저 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> updateUser(@RequestBody UserUpdateRequestBody requestBody) {
+        return GlobalResponse.<String>builder()
+                .message("사용자 정보 수정")
+                .result(userService.updateUser(UserServiceUpdateRequest.builder()
+                        .id(requestBody.getId())
+                        .nickname(requestBody.getNickname())
+                        .height(requestBody.getHeight())
+                        .weight(requestBody.getWeight())
+                        .age(requestBody.getAge())
+                        .spicyPreference(requestBody.getSpicyPreference())
+                        .meatConsumption(requestBody.getMeatConsumption())
+                        .tastePreference(requestBody.getTastePreference())
+                        .activityLevel(requestBody.getActivityLevel())
+                        .preferenceTypeFood(requestBody.getPreferenceTypeFood())
+                        .build()))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "사용자 탈퇴", description = "사용자 탈퇴")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> deleteUser(@PathVariable Long id) {
+        return GlobalResponse.<String>builder()
+                .message("사용자 탈퇴")
+                .result(userService.deleteUser(id))
+                .build();
+    }
+
 
 }
