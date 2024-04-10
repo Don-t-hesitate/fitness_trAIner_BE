@@ -7,5 +7,5 @@ import lombok.*;
 @Setter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserServiceLoginResponse {
-    private String token;
+    private Long id;
 }

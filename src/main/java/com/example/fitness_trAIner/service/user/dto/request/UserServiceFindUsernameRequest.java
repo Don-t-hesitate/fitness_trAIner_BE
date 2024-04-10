@@ -8,15 +8,7 @@ import lombok.Getter;
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserServiceUpdateRequest {
-    private Long id;
+public class UserServiceFindUsernameRequest {
     private String nickname;
-    private int height;
-    private int weight;
     private int age;
-    private int spicyPreference;
-    private Boolean meatConsumption;
-    private String tastePreference;
-    private int activityLevel;
-    private String preferenceTypeFood;
 }

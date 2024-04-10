@@ -2,7 +2,11 @@ package com.example.fitness_trAIner.controller.admin;
 
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
+import com.example.fitness_trAIner.controller.admin.dto.request.AdminLoginRequestBody;
 import com.example.fitness_trAIner.controller.user.dto.request.UserSignupRequestBody;
+import com.example.fitness_trAIner.service.admin.AdminService;
+import com.example.fitness_trAIner.service.admin.dto.request.AdminServiceLoginRequest;
+import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceLoginResponse;
 import com.example.fitness_trAIner.service.user.dto.request.UserServiceSignupRequest;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceSignupResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,17 +26,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 public class AdminController {
-
+    private final AdminService adminService;
     @PostMapping("/login")
-    @Operation(summary = "로그인", description = "유저 회원가입 API")
+    @Operation(summary = "관리자 로그인", description = "관리자 로그인 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<UserServiceSignupResponse> loginAdmin(@RequestBody @Valid UserSignupRequestBody requestBody) {
+    public final GlobalResponse<AdminServiceLoginResponse> loginAdmin(@RequestBody AdminLoginRequestBody requestBody) {
 
 
-        return GlobalResponse.<UserServiceSignupResponse>builder()
-                .message("유저 회원가입")
-
+        return GlobalResponse.<AdminServiceLoginResponse>builder()
+                .message("관리자 로그인")
+                .result(adminService.loginAdmin(AdminServiceLoginRequest.builder()
+                                .username(requestBody.getUsername())
+                                .password(requestBody.getPassword())
+                        .build()))
                 .build();
     }
 }

@@ -30,31 +30,31 @@ public class User {
     @Column(name = "nickname", nullable = false)
     private String nickname;
     @Column(name = "height")
-    private Integer height;
+    private int height;
     @Column(name = "weight")
-    private Integer weight;
+    private int weight;
     @Column(name = "age")
-    private Integer age;
+    private int age;
     @Column(name = "score")
     private Long score;
     @Column(name = "role")
     private String role;
     @Column(name = "spicy_preference")
-    private Integer spicyPreference;
+    private int spicyPreference;
     @Column(name = "meat_consumption")
     private Boolean meatConsumption;
     @Column(name = "taste_preference")
     private String tastePreference;
     @Column(name = "activity_level")
-    private Integer activityLevel;
+    private int activityLevel;
     @Column(name = "preference_type_food")
     private String preferenceTypeFood;
 
 
     @Builder
-    private User(String username, String password, String nickname, Integer height,
-                Integer weight, Integer age, Long score, String role, Integer spicyPreference,
-                Boolean meatConsumption, String tastePreference, Integer activityLevel, String preferenceTypeFood) {
+    private User(String username, String password, String nickname, int height,
+                 int weight, int age, Long score, String role, int spicyPreference,
+                Boolean meatConsumption, String tastePreference, int activityLevel, String preferenceTypeFood) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;

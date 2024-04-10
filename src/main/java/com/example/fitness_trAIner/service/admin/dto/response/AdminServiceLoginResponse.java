@@ -8,5 +8,4 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class AdminServiceLoginResponse {
     private Long id;
-    private String token;
 }

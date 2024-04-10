@@ -2,13 +2,9 @@ package com.example.fitness_trAIner.controller.user;
 
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
-import com.example.fitness_trAIner.controller.user.dto.request.UserLoginRequestBody;
-import com.example.fitness_trAIner.controller.user.dto.request.UserSignupRequestBody;
-import com.example.fitness_trAIner.controller.user.dto.request.UserUpdateRequestBody;
+import com.example.fitness_trAIner.controller.user.dto.request.*;
 import com.example.fitness_trAIner.service.user.UserService;
-import com.example.fitness_trAIner.service.user.dto.request.UserServiceLoginRequest;
-import com.example.fitness_trAIner.service.user.dto.request.UserServiceSignupRequest;
-import com.example.fitness_trAIner.service.user.dto.request.UserServiceUpdateRequest;
+import com.example.fitness_trAIner.service.user.dto.request.*;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceDetailInfoResponse;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceLoginResponse;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceSignupResponse;
@@ -110,5 +106,33 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping()
+    @Operation(summary = "사용자 아이디 찾기", description = "사용자 닉네임/나이를 사용하여 아이디 찾기")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> findUsername(UserFindUsernameRequestBody requestBody) {
+        return GlobalResponse.<String>builder()
+                .message("사용자 아이디 찾기")
+                .result(userService.findUsername(UserServiceFindUsernameRequest.builder()
+                        .nickname(requestBody.getNickname())
+                        .age(requestBody.getAge())
+                        .build()))
+                .build();
+    }
+
+    @PatchMapping()
+    @Operation(summary = "사용자 비밀번호 변경", description = "사용자 닉네임/아이디를 사용하여 비밀번호 변경")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> changePassword(UserChangePasswordRequestBody requestBody) {
+        return GlobalResponse.<String>builder()
+                .message("사용자 아이디 찾기")
+                .result(userService.changePassword(UserServiceChangePasswordRequest.builder()
+                        .nickname(requestBody.getNickname())
+                        .username(requestBody.getUsername())
+                        .newPassword(requestBody.getNewPassword())
+                        .build()))
+                .build();
+    }
 
 }
