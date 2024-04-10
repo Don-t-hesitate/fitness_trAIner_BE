@@ -5,9 +5,7 @@ import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
 import com.example.fitness_trAIner.common.exception.exceptions.SignupFailException;
 import com.example.fitness_trAIner.repository.user.User;
 import com.example.fitness_trAIner.repository.user.UserRepository;
-import com.example.fitness_trAIner.service.user.dto.request.UserServiceLoginRequest;
-import com.example.fitness_trAIner.service.user.dto.request.UserServiceSignupRequest;
-import com.example.fitness_trAIner.service.user.dto.request.UserServiceUpdateRequest;
+import com.example.fitness_trAIner.service.user.dto.request.*;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceDetailInfoResponse;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceLoginResponse;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceSignupResponse;
@@ -67,17 +65,17 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserServiceLoginResponse loginUser(UserServiceLoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(()-> new LoginFailException("아이디 없음"));
+        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(()-> new LoginFailException("아이디 없음 loginUser"));
 
         if (!bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword()))
                 throw new LoginFailException("비밀번호 불일치");
 
-        return UserServiceLoginResponse.builder().token(user.getUsername()).build();
+        return UserServiceLoginResponse.builder().id(user.getId()).build();
     }
 
     @Override
     public UserServiceDetailInfoResponse findById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류"));
+        User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류 findById"));
 
 
         return UserServiceDetailInfoResponse.builder()
@@ -97,7 +95,7 @@ public class UserServiceImp implements UserService {
     @Override
     @Transactional
     public String updateUser(UserServiceUpdateRequest request) {
-        User user = userRepository.findById(request.getId()).orElseThrow(()->new NoUserException("유저 조회 오류"));
+        User user = userRepository.findById(request.getId()).orElseThrow(()->new NoUserException("유저 조회 오류 updateUser"));
 
         Boolean isExistNickname = userRepository.existsByNickname(request.getNickname());
         if (isExistNickname) throw new SignupFailException("닉네임 중복");
@@ -122,10 +120,27 @@ public class UserServiceImp implements UserService {
     @Override
     @Transactional
     public String deleteUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류"));
+        User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류 deleteUser"));
 
         userRepository.deleteById(user.getId());
         return "사용자 탈퇴 성공";
+    }
+
+    @Override
+    public String findUsername(UserServiceFindUsernameRequest request) {
+        User user = userRepository.findByNicknameAndAge(request.getNickname(), request.getAge()).orElseThrow(()->new NoUserException("유저 조회 오류 findUsername"));
+
+        return user.getUsername();
+    }
+
+    @Override
+    @Transactional
+    public String changePassword(UserServiceChangePasswordRequest request) {
+        User user = userRepository.findByUsernameAndNickname(request.getUsername(), request.getNickname()).orElseThrow(()->new NoUserException("유저 조회 오류 changePassword"));
+
+        user.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
+
+        return "비밀번호 변경 성공";
     }
 
 

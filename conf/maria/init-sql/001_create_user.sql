@@ -18,5 +18,8 @@ create table user
 );
 
 
-INSERT INTO user (username, password, nickname, role)
-VALUES ('admin_username', 'strong_password', 'Admin', 'admin');
+INSERT INTO user (username, password, nickname, height,
+                  weight, age, role, spicy_preference, meat_consumption, taste_preference,
+                  activity_level, preference_type_food)
+VALUES ('admin_username', '$2a$10$D1GNQmvoBt2nm7lj3Rbm/eY4SLSFEt585w9xEz0uhNJlMRJg1gzGG', 'Admin',
+        175, 70, 30, 'ADMIN', 3, TRUE, '쓴맛', 3, '한식');

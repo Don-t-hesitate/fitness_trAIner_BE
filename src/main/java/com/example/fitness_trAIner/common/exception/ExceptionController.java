@@ -2,6 +2,7 @@ package com.example.fitness_trAIner.common.exception;
 
 import com.example.fitness_trAIner.common.exception.exceptions.LoginFailException;
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
+import com.example.fitness_trAIner.common.exception.exceptions.RoleAccessDeniedException;
 import com.example.fitness_trAIner.common.exception.exceptions.SignupFailException;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -50,6 +51,13 @@ public class ExceptionController {
     public final GlobalExceptionResponse noUserCaseException(final NoUserException e) {
         log.error("사용자를 찾을 수 없음 오류", e);
         return makeResponse(e.getMessage(), 301);
+    }
+
+    @ExceptionHandler({RoleAccessDeniedException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public final GlobalExceptionResponse roleAccessDeniedException(final RoleAccessDeniedException e) {
+        log.error("권한이 없음 오류", e);
+        return makeResponse(e.getMessage(), 304);
     }
 
 

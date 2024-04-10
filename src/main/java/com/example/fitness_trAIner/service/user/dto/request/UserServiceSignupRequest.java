@@ -12,13 +12,13 @@ public class UserServiceSignupRequest {
     private String username;
     private String password;
     private String nickname;
-    private Integer height;
-    private Integer weight;
-    private Integer age;
-    private Integer spicyPreference;
+    private int height;
+    private int weight;
+    private int age;
+    private int spicyPreference;
     private Boolean meatConsumption;
     private String tastePreference;
-    private Integer activityLevel;
+    private int activityLevel;
     private String preferenceTypeFood;
 
 }
