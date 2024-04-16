@@ -3,12 +3,16 @@ package com.example.fitness_trAIner.controller.admin;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.controller.admin.dto.request.AdminLoginRequestBody;
+import com.example.fitness_trAIner.controller.admin.dto.request.AdminUserUpdateRequestBody;
 import com.example.fitness_trAIner.controller.user.dto.request.UserSignupRequestBody;
+import com.example.fitness_trAIner.controller.user.dto.request.UserUpdateRequestBody;
 import com.example.fitness_trAIner.service.admin.AdminService;
 import com.example.fitness_trAIner.service.admin.dto.request.AdminServiceLoginRequest;
+import com.example.fitness_trAIner.service.admin.dto.request.AdminServiceUserUpdateRequest;
 import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceFindUserListResponse;
 import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceLoginResponse;
 import com.example.fitness_trAIner.service.user.dto.request.UserServiceSignupRequest;
+import com.example.fitness_trAIner.service.user.dto.request.UserServiceUpdateRequest;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceSignupResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 public class AdminController {
+
     private final AdminService adminService;
     @PostMapping("/login")
     @Operation(summary = "관리자 로그인", description = "관리자 로그인 API")
@@ -54,6 +59,27 @@ public class AdminController {
                 .build();
     }
 
+    @PutMapping()
+    @Operation(summary = "사용자 정보 수정", description = "사용자 정보 수정")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> updateUser(@RequestBody AdminUserUpdateRequestBody requestBody) {
+        return GlobalResponse.<String>builder()
+                .message("사용자 정보 수정")
+                .result(adminService.adminUpdateUser(AdminServiceUserUpdateRequest.builder()
+                        .id(requestBody.getId())
+                        .nickname(requestBody.getNickname())
+                        .height(requestBody.getHeight())
+                        .weight(requestBody.getWeight())
+                        .age(requestBody.getAge())
+                        .spicyPreference(requestBody.getSpicyPreference())
+                        .meatConsumption(requestBody.getMeatConsumption())
+                        .tastePreference(requestBody.getTastePreference())
+                        .activityLevel(requestBody.getActivityLevel())
+                        .preferenceTypeFood(requestBody.getPreferenceTypeFood())
+                        .build()))
+                .build();
+    }
 
 
 }
