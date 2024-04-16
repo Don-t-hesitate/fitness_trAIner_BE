@@ -81,5 +81,15 @@ public class AdminController {
                 .build();
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "사용자 탈퇴", description = "사용자 탈퇴")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> deleteUser(@PathVariable Long id) {
+        return GlobalResponse.<String>builder()
+                .message("사용자 탈퇴")
+                .result(adminService.deleteUser(id))
+                .build();
+    }
 
 }

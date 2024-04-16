@@ -11,6 +11,6 @@ public interface AdminService {
     public AdminServiceLoginResponse loginAdmin(AdminServiceLoginRequest request);
     public AdminServiceFindUserListResponse findUserList();
     public String adminUpdateUser(AdminServiceUserUpdateRequest request);
-
+    public String deleteUser(Long id);
 
 }

@@ -87,6 +87,11 @@ public class AdminServiceImp implements AdminService{
 
         return "사용자 정보 수정 성공";
     }
+    public String deleteUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류 deleteUser"));
 
+        userRepository.deleteById(user.getId());
+        return "사용자 탈퇴 성공";
+    }
 
 }
