@@ -5,16 +5,17 @@ import com.example.fitness_trAIner.common.exception.exceptions.RoleAccessDeniedE
 import com.example.fitness_trAIner.repository.user.User;
 import com.example.fitness_trAIner.repository.user.UserRepository;
 import com.example.fitness_trAIner.service.admin.dto.request.AdminServiceLoginRequest;
+import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceFindUserListResponse;
 import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceLoginResponse;
-import com.example.fitness_trAIner.service.user.dto.response.UserServiceLoginResponse;
+import com.example.fitness_trAIner.vos.UserVO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.naming.AuthenticationException;
-import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -36,5 +37,24 @@ public class AdminServiceImp implements AdminService{
         }
 
         return AdminServiceLoginResponse.builder().id(user.getId()).build();
+    }
+
+    @Override
+    public AdminServiceFindUserListResponse findUserList() {
+        List<User> userList = userRepository.findAll();
+        List<UserVO> userVOList = new ArrayList<>();
+
+        for (User user : userList) {
+            UserVO userVO = new UserVO();
+            userVO.setUserId(user.getId());
+            userVO.setUsername(user.getUsername());
+            userVO.setNickname(user.getNickname());
+
+            userVOList.add(userVO);
+        }
+
+        return AdminServiceFindUserListResponse.builder()
+                .userList(userVOList)
+                .build();
     }
 }

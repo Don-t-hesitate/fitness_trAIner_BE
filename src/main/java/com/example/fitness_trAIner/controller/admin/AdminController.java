@@ -6,6 +6,7 @@ import com.example.fitness_trAIner.controller.admin.dto.request.AdminLoginReques
 import com.example.fitness_trAIner.controller.user.dto.request.UserSignupRequestBody;
 import com.example.fitness_trAIner.service.admin.AdminService;
 import com.example.fitness_trAIner.service.admin.dto.request.AdminServiceLoginRequest;
+import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceFindUserListResponse;
 import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceLoginResponse;
 import com.example.fitness_trAIner.service.user.dto.request.UserServiceSignupRequest;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceSignupResponse;
@@ -16,10 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/admin")
 @Tag(name = "Admin", description = "관리자 관련 API")
@@ -42,4 +40,20 @@ public class AdminController {
                         .build()))
                 .build();
     }
+
+    @GetMapping("/users")
+    @Operation(summary = "사용자 조회", description = "모든 사용자 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<AdminServiceFindUserListResponse> findAllUserList() {
+
+
+        return GlobalResponse.<AdminServiceFindUserListResponse>builder()
+                .message("유저조회")
+                .result(adminService.findUserList())
+                .build();
+    }
+
+
+
 }
