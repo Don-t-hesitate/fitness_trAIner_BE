@@ -35,8 +35,6 @@ public class User {
     private int weight;
     @Column(name = "age")
     private int age;
-    @Column(name = "score")
-    private Long score;
     @Column(name = "role")
     private String role;
     @Column(name = "spicy_preference")
@@ -53,7 +51,7 @@ public class User {
 
     @Builder
     private User(String username, String password, String nickname, int height,
-                 int weight, int age, Long score, String role, int spicyPreference,
+                 int weight, int age, String role, int spicyPreference,
                 Boolean meatConsumption, String tastePreference, int activityLevel, String preferenceTypeFood) {
         this.username = username;
         this.password = password;
@@ -61,7 +59,6 @@ public class User {
         this.height = height;
         this.weight = weight;
         this.age = age;
-        this.score = score;
         this.role = role;
         this.spicyPreference = spicyPreference;
         this.meatConsumption = meatConsumption;

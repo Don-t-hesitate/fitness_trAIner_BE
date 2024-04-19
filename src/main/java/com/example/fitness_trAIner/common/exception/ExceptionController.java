@@ -63,16 +63,16 @@ public class ExceptionController {
 
 
 
-    private GlobalExceptionResponse<String> makeResponse(String message, int status) {
+    private GlobalExceptionResponse<String> makeResponse(String message, int code) {
         return GlobalExceptionResponse.<String>builder()
                 .message(message)
-                .status(status)
+                .code(code)
                 .build();
     }
 
-    private GlobalExceptionResponse<List<String>> makeResponse(List<String> messages) {
+    private GlobalExceptionResponse<List<String>> makeResponse(List<String> message) {
         return GlobalExceptionResponse.<List<String>>builder()
-                .message(messages)
+                .message(message)
                 .build();
     }
 

@@ -15,10 +15,10 @@ public class GlobalExceptionResponse<T> {
     @Schema(description = "에러 발생 시 메시지", example = "에러 메시지")
     private T message;
     @Schema(description = "에러 발생 코드", example = "404")
-    private int status;
+    private int code;
     @Builder
-    public GlobalExceptionResponse(T message, int status) {
+    public GlobalExceptionResponse(T message, int code) {
         this.message = message;
-        this.status = status;
+        this.code = code;
     }
 }
