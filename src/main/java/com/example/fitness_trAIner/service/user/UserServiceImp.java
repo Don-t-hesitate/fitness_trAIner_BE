@@ -97,8 +97,10 @@ public class UserServiceImp implements UserService {
     public String updateUser(UserServiceUpdateRequest request) {
         User user = userRepository.findById(request.getId()).orElseThrow(()->new NoUserException("유저 조회 오류 updateUser"));
 
-        Boolean isExistNickname = userRepository.existsByNickname(request.getNickname());
-        if (isExistNickname) throw new SignupFailException("닉네임 중복");
+        if (!request.getNickname().equals(user.getNickname())) {
+            Boolean isExistNickname = userRepository.existsByNickname(request.getNickname());
+            if (isExistNickname) throw new SignupFailException("닉네임 중복");
+        }
 
         user.setNickname(request.getNickname());
         user.setHeight(request.getHeight());
