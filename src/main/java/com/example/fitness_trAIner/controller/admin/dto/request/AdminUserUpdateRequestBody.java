@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 public class AdminUserUpdateRequestBody {
     private Long id;
-    private String nickname;
+//    private String nickname;
     private int height;
     private int weight;
     private int age;
