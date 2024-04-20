@@ -68,7 +68,7 @@ public class AdminController {
                 .message("사용자 정보 수정")
                 .result(adminService.adminUpdateUser(AdminServiceUserUpdateRequest.builder()
                         .id(requestBody.getId())
-//                        .nickname(requestBody.getNickname())
+                        .nickname(requestBody.getNickname())
                         .height(requestBody.getHeight())
                         .weight(requestBody.getWeight())
                         .age(requestBody.getAge())
