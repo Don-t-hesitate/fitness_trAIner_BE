@@ -20,19 +20,15 @@ public class DietServiceImp implements DietService{
         List<String> foodList = new ArrayList<>();
         int totalCalorie = 1480; // 예시 값
 
-        if(category.equals("korean")) {
-            foodList = Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
-        } else if(category.equals("chinese")) {
-            foodList = Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
-        } else if(category.equals("japanese")) {
-            foodList = Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
-        } else if(category.equals("western")) {
-            foodList = Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
-        } else if (category.equals("dessert")) {
-            foodList = Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
-        } else if (category.equals("fastfood")) {
-            foodList = Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
-        }
+        foodList = switch (category) {
+            case "korean" -> Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
+            case "chinese" -> Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
+            case "japanese" -> Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
+            case "western" -> Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
+            case "dessert" -> Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
+            case "fastfood" -> Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
+            default -> foodList;
+        };
 
         return DietServiceRecommendResponse.builder()
                 .foodRecommend(foodList)
