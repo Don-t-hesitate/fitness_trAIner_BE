@@ -55,6 +55,11 @@ public class AdminServiceImp implements AdminService{
             userVO.setUserId(user.getId());
             userVO.setUsername(user.getUsername());
             userVO.setNickname(user.getNickname());
+            userVO.setAge(user.getAge());
+            userVO.setHeight(user.getHeight());
+            userVO.setWeight(user.getWeight());
+
+
 
             userVOList.add(userVO);
         }
