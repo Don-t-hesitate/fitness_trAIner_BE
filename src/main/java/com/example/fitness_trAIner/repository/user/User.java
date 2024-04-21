@@ -30,9 +30,9 @@ public class User {
     @Column(name = "nickname", nullable = false)
     private String nickname;
     @Column(name = "height")
-    private int height;
+    private float height;
     @Column(name = "weight")
-    private int weight;
+    private float weight;
     @Column(name = "age")
     private int age;
     @Column(name = "role")
@@ -50,8 +50,8 @@ public class User {
 
 
     @Builder
-    private User(String username, String password, String nickname, int height,
-                 int weight, int age, String role, int spicyPreference,
+    private User(String username, String password, String nickname, float height,
+                 float weight, int age, String role, int spicyPreference,
                 Boolean meatConsumption, String tastePreference, int activityLevel, String preferenceTypeFood) {
         this.username = username;
         this.password = password;

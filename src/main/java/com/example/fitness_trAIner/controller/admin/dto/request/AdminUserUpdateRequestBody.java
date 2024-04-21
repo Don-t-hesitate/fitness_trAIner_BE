@@ -11,8 +11,8 @@ import lombok.Getter;
 public class AdminUserUpdateRequestBody {
     private Long id;
     private String nickname;
-    private int height;
-    private int weight;
+    private float height;
+    private float weight;
     private int age;
     private int spicyPreference;
     private Boolean meatConsumption;

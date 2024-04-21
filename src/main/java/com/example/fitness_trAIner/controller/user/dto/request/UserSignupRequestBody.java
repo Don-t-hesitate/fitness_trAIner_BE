@@ -14,8 +14,8 @@ public class UserSignupRequestBody {
     private String username;
     private String password;
     private String nickname;
-    private int height;
-    private int weight;
+    private float height;
+    private float weight;
     private int age;
     private int spicyPreference;
     private Boolean meatConsumption;
