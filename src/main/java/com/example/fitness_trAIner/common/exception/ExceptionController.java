@@ -4,6 +4,7 @@ import com.example.fitness_trAIner.common.exception.exceptions.LoginFailExceptio
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
 import com.example.fitness_trAIner.common.exception.exceptions.RoleAccessDeniedException;
 import com.example.fitness_trAIner.common.exception.exceptions.SignupFailException;
+import com.example.fitness_trAIner.common.exception.exceptions.InvalidCategoryException;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,13 @@ public class ExceptionController {
     public final GlobalExceptionResponse roleAccessDeniedException(final RoleAccessDeniedException e) {
         log.error("권한이 없음 오류", e);
         return makeResponse(e.getMessage(), 304);
+    }
+
+    @ExceptionHandler({InvalidCategoryException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse invalidCategoryException(final InvalidCategoryException e) {
+        log.error("유효하지 않은 카테고리", e);
+        return makeResponse(e.getMessage(), 400);
     }
 
 

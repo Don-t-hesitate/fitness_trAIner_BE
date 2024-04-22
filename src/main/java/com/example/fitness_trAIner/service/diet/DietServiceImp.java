@@ -1,5 +1,6 @@
 package com.example.fitness_trAIner.service.diet;
 
+import com.example.fitness_trAIner.common.exception.exceptions.InvalidCategoryException;
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceRecommendRequest;
 import com.example.fitness_trAIner.service.diet.dto.response.DietServiceRecommendResponse;
 import lombok.AccessLevel;
@@ -27,7 +28,7 @@ public class DietServiceImp implements DietService{
             case "western" -> Arrays.asList("라따뚜이", "블랙 푸딩", "알리오 올리오", "포케", "피시 앤 칩스");
             case "fastfood" -> Arrays.asList("샌드위치", "햄버거", "라면", "떡볶이", "피자");
             case "dessert" -> Arrays.asList("버블티", "치즈케이크", "마카롱", "티라미수", "와플");
-            default -> foodList;
+            default -> throw new InvalidCategoryException("Unexpected value: " + category);
         };
 
         return DietServiceRecommendResponse.builder()
