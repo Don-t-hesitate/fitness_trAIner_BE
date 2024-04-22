@@ -1,5 +1,6 @@
 package com.example.fitness_trAIner.common.exception;
 
+
 import com.example.fitness_trAIner.common.exception.exceptions.*;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -63,6 +64,13 @@ public class ExceptionController {
     public final GlobalExceptionResponse fileStorefailException(final FileStoreException e) {
         log.error(ErrorCode.FILESTORE_ERROR.getMessage(), e);
         return makeResponse(e.getMessage(), ErrorCode.FILESTORE_ERROR.getCode());
+    }
+
+    @ExceptionHandler({InvalidCategoryException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse invalidCategoryException(final InvalidCategoryException e) {
+        log.error("유효하지 않은 카테고리", e);
+        return makeResponse(e.getMessage(), 400);
     }
 
 
