@@ -1,10 +1,7 @@
 package com.example.fitness_trAIner.common.exception;
 
-import com.example.fitness_trAIner.common.exception.exceptions.LoginFailException;
-import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
-import com.example.fitness_trAIner.common.exception.exceptions.RoleAccessDeniedException;
-import com.example.fitness_trAIner.common.exception.exceptions.SignupFailException;
-import com.example.fitness_trAIner.common.exception.exceptions.InvalidCategoryException;
+
+import com.example.fitness_trAIner.common.exception.exceptions.*;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
@@ -37,28 +34,36 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public final GlobalExceptionResponse handleSignupFailException(final SignupFailException e) {
         log.error("회원가입 오류", e);
-        return makeResponse(e.getMessage(), 301);
+        return makeResponse(e.getMessage(), ErrorCode.AUTHENTICATION_ERROR.getCode());
     }
 
     @ExceptionHandler({LoginFailException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public final GlobalExceptionResponse loginFailException(final LoginFailException e) {
         log.error("로그인 오류", e);
-        return makeResponse(e.getMessage(), 301);
+        return makeResponse(e.getMessage(), ErrorCode.AUTHENTICATION_ERROR.getCode());
     }
 
     @ExceptionHandler({NoUserException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public final GlobalExceptionResponse noUserCaseException(final NoUserException e) {
         log.error("사용자를 찾을 수 없음 오류", e);
-        return makeResponse(e.getMessage(), 301);
+        return makeResponse(e.getMessage(), ErrorCode.AUTHENTICATION_ERROR.getCode());
     }
 
     @ExceptionHandler({RoleAccessDeniedException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public final GlobalExceptionResponse roleAccessDeniedException(final RoleAccessDeniedException e) {
         log.error("권한이 없음 오류", e);
-        return makeResponse(e.getMessage(), 304);
+        return makeResponse(e.getMessage(), ErrorCode.UNAUTHORIZED.getCode());
+    }
+
+
+    @ExceptionHandler({FileStoreException.class})
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public final GlobalExceptionResponse fileStorefailException(final FileStoreException e) {
+        log.error(ErrorCode.FILESTORE_ERROR.getMessage(), e);
+        return makeResponse(e.getMessage(), ErrorCode.FILESTORE_ERROR.getCode());
     }
 
     @ExceptionHandler({InvalidCategoryException.class})
