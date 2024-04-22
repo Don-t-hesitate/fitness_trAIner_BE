@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 @Getter
 public class UserUpdateRequestBody {
-    private Long id;
+    private Long userId;
     private String nickname;
     private float height;
     private float weight;

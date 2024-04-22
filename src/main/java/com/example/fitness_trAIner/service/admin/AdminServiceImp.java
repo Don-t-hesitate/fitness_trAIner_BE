@@ -42,7 +42,7 @@ public class AdminServiceImp implements AdminService{
             throw new RoleAccessDeniedException("권한없음 loginAdmin");
         }
 
-        return AdminServiceLoginResponse.builder().id(user.getId()).build();
+        return AdminServiceLoginResponse.builder().id(user.getUserId()).build();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class AdminServiceImp implements AdminService{
 
         for (User user : userList) {
             UserVO userVO = new UserVO();
-            userVO.setUserId(user.getId());
+            userVO.setUserId(user.getUserId());
             userVO.setUsername(user.getUsername());
             userVO.setNickname(user.getNickname());
             userVO.setAge(user.getAge());
@@ -98,7 +98,7 @@ public class AdminServiceImp implements AdminService{
     public String deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류 deleteUser"));
 
-        userRepository.deleteById(user.getId());
+        userRepository.deleteById(user.getUserId());
         return "사용자 탈퇴 성공";
     }
 

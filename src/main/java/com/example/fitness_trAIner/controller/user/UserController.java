@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
+//TODO Schema 수정
 @RequestMapping("/users")
 @Tag(name = "User", description = "유저 관련 API")
 @RequiredArgsConstructor
@@ -64,7 +64,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "아이디로 유저 조회", description = "유저 조회")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true, content = @Content(schema = @Schema(implementation =  UserServiceDetailInfoResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<UserServiceDetailInfoResponse> findById(@PathVariable Long id) {
         return GlobalResponse.<UserServiceDetailInfoResponse>builder()
@@ -81,7 +81,7 @@ public class UserController {
         return GlobalResponse.<String>builder()
                 .message("사용자 정보 수정")
                 .result(userService.updateUser(UserServiceUpdateRequest.builder()
-                        .id(requestBody.getId())
+                        .id(requestBody.getUserId())
                         .nickname(requestBody.getNickname())
                         .height(requestBody.getHeight())
                         .weight(requestBody.getWeight())

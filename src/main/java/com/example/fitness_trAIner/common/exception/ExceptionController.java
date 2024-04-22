@@ -60,7 +60,7 @@ public class ExceptionController {
 
     @ExceptionHandler({FileStoreException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public final GlobalExceptionResponse fileStorefailException(final FileStoreException e) {
+    public final GlobalExceptionResponse fileStoreFailException(final FileStoreException e) {
         log.error(ErrorCode.FILESTORE_ERROR.getMessage(), e);
         return makeResponse(e.getMessage(), ErrorCode.FILESTORE_ERROR.getCode());
     }

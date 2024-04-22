@@ -1,10 +1,7 @@
 package com.example.fitness_trAIner.repository.user;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -14,12 +11,14 @@ import org.hibernate.annotations.DynamicUpdate;
 @NoArgsConstructor
 @DynamicUpdate
 @DynamicInsert
+@Builder
+@AllArgsConstructor
 @Table(name = "user")
 public class User {
     @Id
     @Column(name = "user_id", updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
 
 
@@ -49,31 +48,9 @@ public class User {
     private String preferenceTypeFood;
 
 
-    @Builder
-    private User(String username, String password, String nickname, float height,
-                 float weight, int age, String role, int spicyPreference,
-                Boolean meatConsumption, String tastePreference, int activityLevel, String preferenceTypeFood) {
-        this.username = username;
-        this.password = password;
-        this.nickname = nickname;
-        this.height = height;
-        this.weight = weight;
-        this.age = age;
-        this.role = role;
-        this.spicyPreference = spicyPreference;
-        this.meatConsumption = meatConsumption;
-        this.tastePreference = tastePreference;
-        this.activityLevel = activityLevel;
-        this.preferenceTypeFood = preferenceTypeFood;
-    }
 
-//    @Builder
-//    private User(String username, String role, String password, String nickname) {
-//        this.username = username;
-//        this.password = password;
-//        this.role = role;
-//        this.nickname = nickname;
-//    }
+
+
 
 
 }

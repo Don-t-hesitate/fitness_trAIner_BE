@@ -70,7 +70,7 @@ public class UserServiceImp implements UserService {
         if (!bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword()))
                 throw new LoginFailException("비밀번호 불일치");
 
-        return UserServiceLoginResponse.builder().id(user.getId()).build();
+        return UserServiceLoginResponse.builder().id(user.getUserId()).build();
     }
 
     @Override
@@ -124,7 +124,7 @@ public class UserServiceImp implements UserService {
     public String deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류 deleteUser"));
 
-        userRepository.deleteById(user.getId());
+        userRepository.deleteById(user.getUserId());
         return "사용자 탈퇴 성공";
     }
 
