@@ -70,7 +70,7 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public final GlobalExceptionResponse invalidCategoryException(final InvalidCategoryException e) {
         log.error("유효하지 않은 카테고리", e);
-        return makeResponse(e.getMessage(), 400);
+        return makeResponse(e.getMessage(), ErrorCode.DIET_ERROR.getCode());
     }
 
 
