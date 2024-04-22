@@ -20,6 +20,7 @@ import java.util.UUID;
 public class WorkOutServiceImp implements WorkOutService {
     private String uploadDir = "./src/video";
 
+//    private String uploadDir = "/home/t24108/ai/video/users";
     @Override
     public void fileUpload(MultipartFile file) {
         String randomName = UUID.randomUUID().toString();
