@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +27,10 @@ public class UserController {
     @Operation(summary = "회원가입", description = "유저 회원가입 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<UserServiceSignupResponse> saveUser(@RequestBody @Valid UserSignupRequestBody requestBody) {
+    public final GlobalResponse<UserServiceSignupResponse> saveUser(@RequestBody userSignupRequestBody requestBody) {
 
-
+        System.out.println(requestBody.getHeight());
+        System.out.println(requestBody.getWeight());
         return GlobalResponse.<UserServiceSignupResponse>builder()
                 .message("유저 회원가입")
                 .result(userService.signupUser(UserServiceSignupRequest.builder()

@@ -9,18 +9,19 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-public class UserSignupRequestBody {
+public class userSignupRequestBody {
 
     private String username;
     private String password;
     private String nickname;
-    private float height;
-    private float weight;
-    private int age;
-    private int spicyPreference;
+    private Float height;
+    private Float weight;
+    private Integer age;
+    private Integer spicyPreference;
     private Boolean meatConsumption;
     private String tastePreference;
-    private int activityLevel;
+    private Integer activityLevel;
     private String preferenceTypeFood;
+
 
 }

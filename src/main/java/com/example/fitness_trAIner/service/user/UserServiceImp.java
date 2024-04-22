@@ -53,7 +53,7 @@ public class UserServiceImp implements UserService {
                     .role("NORMAL")
                     .build());
         } catch (Exception e) {
-            throw new SignupFailException();
+            throw new SignupFailException("db저장 실패");
         }
         return UserServiceSignupResponse.builder()
                 .name(user.getUsername())

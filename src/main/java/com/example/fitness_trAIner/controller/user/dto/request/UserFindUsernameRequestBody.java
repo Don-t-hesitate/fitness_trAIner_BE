@@ -8,5 +8,5 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserFindUsernameRequestBody {
     private String nickname;
-    private int age;
+    private Integer age;
 }
