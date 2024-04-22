@@ -1,5 +1,6 @@
 package com.example.fitness_trAIner.controller.diet;
 
+import com.example.fitness_trAIner.common.exception.exceptions.InvalidCategoryException;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.controller.diet.dto.request.DietRecommendRequestBody;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RequestMapping("/diet")
 @Tag(name = "Diet", description = "식단 관련 API")
@@ -29,14 +32,20 @@ public class DietController {
     public final GlobalResponse<DietServiceRecommendResponse> findAllDietList(
             @RequestParam(required = false) String category) {
 
+        String validatedCategory = Optional.ofNullable(category)
+                .orElseThrow(() -> new InvalidCategoryException("카테고리가 필요합니다."));
+
         DietServiceRecommendRequest request = DietServiceRecommendRequest.builder()
-                .category(category)
+                .category(validatedCategory)
                 .build();
+
+        DietServiceRecommendResponse response = dietService.recommendDiet(request);
 
         return GlobalResponse.<DietServiceRecommendResponse>builder()
                 .message("식단조회")
-                .result(dietService.recommendDiet(request))
+                .result(response)
                 .build();
+
     }
 
 }
