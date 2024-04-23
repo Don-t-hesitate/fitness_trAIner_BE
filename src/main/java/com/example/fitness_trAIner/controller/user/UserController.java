@@ -106,7 +106,7 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("/{nickname}/{age}")
+    @GetMapping("/{requestNickname}/{requestAge}")
     @Operation(summary = "사용자 아이디 찾기", description = "사용자 닉네임/나이를 사용하여 아이디 찾기")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
