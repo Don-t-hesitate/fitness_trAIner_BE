@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id "com.github.node-gradle.node" version "3.5.1"
 }
 
 group = 'com.example'
@@ -85,4 +86,22 @@ tasks.named('test') {
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
+}
+
+// react 앱 설치를 위한 npm 태스크 추가
+node {
+    version = "18.17.1" //사용하고자 하는 노드 버전
+    download = true
+}
+
+// npmInstall 태스크 사용
+task installReactDeps(type: NpmTask) {
+    workingDir = file("${projectDir}/react-app")
+    args = ["install", "--legacy-peer-deps"]
+}
+
+// buildReact 태스크에 installReactDeps 의존성 추가
+task buildReact(type: NpmTask, dependsOn: 'installReactDeps') {
+    workingDir = file("${projectDir}/react-app")
+    args = ["run", "build"]
 }
