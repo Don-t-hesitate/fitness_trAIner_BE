@@ -27,7 +27,7 @@ public class UserController {
     @Operation(summary = "회원가입", description = "유저 회원가입 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<UserServiceSignupResponse> saveUser(@RequestBody userSignupRequestBody requestBody) {
+    public final GlobalResponse<UserServiceSignupResponse> saveUser(@RequestBody UserSignupRequestBody requestBody) {
 
         System.out.println(requestBody.getHeight());
         System.out.println(requestBody.getWeight());
@@ -106,18 +106,21 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping()
+    @GetMapping("/{nickname}/{age}")
     @Operation(summary = "사용자 아이디 찾기", description = "사용자 닉네임/나이를 사용하여 아이디 찾기")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> findUsername(UserFindUsernameRequestBody requestBody) {
+    public final GlobalResponse<String> findUsername(@PathVariable String requestNickname, @PathVariable Integer requestAge) {
+
+
         return GlobalResponse.<String>builder()
                 .message("사용자 아이디 찾기")
                 .result(userService.findUsername(UserServiceFindUsernameRequest.builder()
-                        .nickname(requestBody.getNickname())
-                        .age(requestBody.getAge())
+                        .nickname(requestNickname)
+                        .age(requestAge)
                         .build()))
                 .build();
+
     }
 
     @PatchMapping()

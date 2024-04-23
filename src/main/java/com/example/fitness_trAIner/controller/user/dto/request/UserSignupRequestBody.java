@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-public class userSignupRequestBody {
+public class UserSignupRequestBody {
 
     private String username;
     private String password;
