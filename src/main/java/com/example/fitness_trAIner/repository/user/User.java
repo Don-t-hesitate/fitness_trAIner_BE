@@ -29,24 +29,23 @@ public class User {
     @Column(name = "nickname", nullable = false)
     private String nickname;
     @Column(name = "height")
-    private float height;
+    private Float height;
     @Column(name = "weight")
-    private float weight;
+    private Float weight;
     @Column(name = "age")
-    private int age;
+    private Integer age;
     @Column(name = "role")
     private String role;
     @Column(name = "spicy_preference")
-    private int spicyPreference;
+    private Integer spicyPreference;
     @Column(name = "meat_consumption")
     private Boolean meatConsumption;
     @Column(name = "taste_preference")
     private String tastePreference;
     @Column(name = "activity_level")
-    private int activityLevel;
+    private Integer activityLevel;
     @Column(name = "preference_type_food")
     private String preferenceTypeFood;
-
 
 
 

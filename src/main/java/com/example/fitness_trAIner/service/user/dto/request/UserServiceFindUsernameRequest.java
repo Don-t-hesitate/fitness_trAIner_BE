@@ -10,5 +10,5 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserServiceFindUsernameRequest {
     private String nickname;
-    private int age;
+    private Integer age;
 }

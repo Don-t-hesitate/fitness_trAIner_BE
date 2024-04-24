@@ -10,8 +10,8 @@ import lombok.*;
 public class UserServiceDetailInfoResponse {
     private String username;
     private String nickname;
-    private float height;
-    private float weight;
+    private Float height;
+    private Float weight;
     private Integer age;
     private Integer spicyPreference;
     private Boolean meatConsumption;
