@@ -1,14 +1,14 @@
 package com.example.fitness_trAIner.service.workout;
 
 import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
-import com.example.fitness_trAIner.repository.workout.Note;
-import com.example.fitness_trAIner.repository.workout.NoteRepository;
-import com.example.fitness_trAIner.repository.workout.Workout;
-import com.example.fitness_trAIner.repository.workout.WorkoutRepository;
+import com.example.fitness_trAIner.repository.workout.*;
+import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveVideoRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveWorkoutRequest;
+import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceSaveNoteResponse;
 import com.example.fitness_trAIner.vos.WorkoutVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,11 +27,14 @@ import java.util.UUID;
 public class WorkoutServiceImp implements WorkoutService {
     private final NoteRepository noteRepository;
     private final WorkoutRepository workoutRepository;
-    private String uploadDir = "C:\\video";
+    private final WorkoutVideoRepository workoutVideoRepository;
+    @Value("${videopath.user}")
+    private String uploadDir;
+//    private String uploadDir = "C:\\video";
 
 //    private String uploadDir = "/home/t24108/ai/video/users";
     @Override
-    public void fileUpload(MultipartFile file) {
+    public String fileUpload(MultipartFile file, WorkoutServiceSaveVideoRequest request) {
         if (!file.getContentType().equals("video/mp4")) {
             log.error("파일 확장자 에러");
             throw new FileStoreException("파일 확장자가 알맞지 않습니다.");
@@ -42,10 +45,18 @@ public class WorkoutServiceImp implements WorkoutService {
         File uploadPath = copyOfLocation.toFile();
         uploadPath.mkdirs();
 
-        try{
+        WorkoutVideo workoutVideo;
+
+        try {
             System.out.println("file경로 " + copyOfLocation.toString());
             Files.copy(file.getInputStream(), copyOfLocation, StandardCopyOption.REPLACE_EXISTING);
+            workoutVideo = workoutVideoRepository.save(WorkoutVideo.builder()
+                    .fileName(copyOfLocation.toString())
+                    .noteId(request.getNoteId())
+                    .exerciseName(request.getExerciseName())
+                    .build());
 
+            return "파일 저장 성공";
         }catch (IOException e) {
             e.printStackTrace();
             throw new FileStoreException("파일 저장 실패 : " + file.getOriginalFilename());
@@ -54,10 +65,12 @@ public class WorkoutServiceImp implements WorkoutService {
     }
 
     @Override
-    public String saveNote(Long id) {
+    public WorkoutServiceSaveNoteResponse saveNote(Long id) {
         Note note = noteRepository.save(Note.builder().userId(id).build());
 
-        return "운동 일지 생성 성공";
+        return WorkoutServiceSaveNoteResponse.builder()
+                .noteId(note.getNoteId())
+                .build();
     }
 
     @Override

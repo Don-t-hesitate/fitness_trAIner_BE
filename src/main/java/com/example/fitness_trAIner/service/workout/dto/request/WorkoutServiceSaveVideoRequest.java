@@ -7,13 +7,11 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class WorkoutServiceSaveWorkoutRequest {
+public class WorkoutServiceSaveVideoRequest {
     private Long noteId;
-    private Integer scoreCool;
-    private Integer scoreGood;
-    private Integer scoreNotgood;
-    private List<WorkoutVO> workoutList;
+    private String exerciseName;
 }
