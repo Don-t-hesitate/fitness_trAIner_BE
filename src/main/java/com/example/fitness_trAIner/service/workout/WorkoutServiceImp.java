@@ -56,6 +56,7 @@ public class WorkoutServiceImp implements WorkoutService {
     @Override
     public String saveNote(Long id) {
         Note note = noteRepository.save(Note.builder().userId(id).build());
+
         return "운동 일지 생성 성공";
     }
 

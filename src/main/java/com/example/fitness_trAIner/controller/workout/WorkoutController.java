@@ -42,6 +42,7 @@ public class WorkoutController {
     public final GlobalResponse<String> uploadUserNote(@PathVariable Long id) {
         return GlobalResponse.<String>builder()
                 .message("유저 운동일지 생성")
+                //FIXME 노트 아이디를 response 해줘야한다.
                 .result(workoutService.saveNote(id))
                 .build();
     }
