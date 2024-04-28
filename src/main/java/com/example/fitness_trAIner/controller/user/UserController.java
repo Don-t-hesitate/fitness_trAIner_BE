@@ -25,7 +25,7 @@ public class UserController {
 
     @PostMapping("/signup")
     @Operation(summary = "회원가입", description = "유저 회원가입 API")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = UserServiceSignupResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<UserServiceSignupResponse> saveUser(@RequestBody UserSignupRequestBody requestBody) {
 
@@ -51,6 +51,8 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "유저 로그인 API")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = UserServiceLoginResponse.class)))
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<UserServiceLoginResponse> loginUser(@RequestBody UserLoginRequestBody requestBody) {
 
         return GlobalResponse.<UserServiceLoginResponse>builder()

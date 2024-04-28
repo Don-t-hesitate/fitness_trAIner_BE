@@ -8,6 +8,7 @@ import com.example.fitness_trAIner.service.admin.AdminService;
 import com.example.fitness_trAIner.service.admin.dto.request.AdminServiceLoginRequest;
 import com.example.fitness_trAIner.service.admin.dto.request.AdminServiceUserUpdateRequest;
 import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceFindUserListResponse;
+import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceFindWorkoutVideoListResponse;
 import com.example.fitness_trAIner.service.admin.dto.response.AdminServiceLoginResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +27,7 @@ public class AdminController {
     private final AdminService adminService;
     @PostMapping("/login")
     @Operation(summary = "관리자 로그인", description = "관리자 로그인 API")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = AdminServiceLoginResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<AdminServiceLoginResponse> loginAdmin(@RequestBody AdminLoginRequestBody requestBody) {
 
@@ -42,7 +43,7 @@ public class AdminController {
 
     @GetMapping("/users")
     @Operation(summary = "사용자 조회", description = "모든 사용자 조회")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = AdminServiceFindUserListResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<AdminServiceFindUserListResponse> findAllUserList() {
 
@@ -86,4 +87,27 @@ public class AdminController {
                 .build();
     }
 
+    @GetMapping("/workouts/videos")
+    @Operation(summary = "사용자 운동 영상 리스트 조회", description = "모든 사용자 운동 영상 정보 조회")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = AdminServiceFindWorkoutVideoListResponse.class)))
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<AdminServiceFindWorkoutVideoListResponse> findAllWorkoutVideoList() {
+
+
+        return GlobalResponse.<AdminServiceFindWorkoutVideoListResponse>builder()
+                .message("유저조회")
+                .result(adminService.findWorkoutVideoList())
+                .build();
+    }
+
+    @DeleteMapping("/workouts/{wokroutVideoId}")
+    @Operation(summary = "사용자 탈퇴", description = "사용자 탈퇴")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> deleteWorkoutVideo(@PathVariable Long wokroutVideoId) {
+        return GlobalResponse.<String>builder()
+                .message("사용자 운동 영상 삭제")
+                .result(adminService.deleteWorkoutVideo(wokroutVideoId))
+                .build();
+    }
 }

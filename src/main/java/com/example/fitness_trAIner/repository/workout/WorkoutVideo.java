@@ -19,12 +19,12 @@ import java.time.LocalDateTime;
 @DynamicInsert
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "user_video")
+@Table(name = "workout_video")
 public class WorkoutVideo {
     @Id
-    @Column(name = "user_video_id", updatable = false)
+    @Column(name = "workout_video_id", updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userVideoId;
+    private Long workoutVideoId;
 
     @Column(name = "note_id", nullable = false)
     private Long noteId;
