@@ -53,7 +53,7 @@ public class AdminController {
                 .build();
     }
 
-    @PutMapping()
+    @PutMapping("/{id}")
     @Operation(summary = "사용자 정보 수정", description = "사용자 정보 수정")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
