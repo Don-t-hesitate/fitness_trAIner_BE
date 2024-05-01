@@ -2,6 +2,7 @@ package com.example.fitness_trAIner.service.workout;
 
 import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
+import com.example.fitness_trAIner.common.exception.exceptions.NoteException;
 import com.example.fitness_trAIner.repository.user.UserScore;
 import com.example.fitness_trAIner.repository.user.UserScoreRepository;
 import com.example.fitness_trAIner.repository.workout.*;
@@ -34,9 +35,7 @@ public class WorkoutServiceImp implements WorkoutService {
     private final UserScoreRepository userScoreRepository;
     @Value("${videopath.user}")
     private String uploadDir;
-//    private String uploadDir = "C:\\video";
 
-//    private String uploadDir = "/home/t24108/ai/video/users";
     @Override
     public String fileUpload(MultipartFile file, WorkoutServiceSaveVideoRequest request) {
         if (!file.getContentType().equals("video/mp4")) {
@@ -69,8 +68,8 @@ public class WorkoutServiceImp implements WorkoutService {
     }
 
     @Override
-    public WorkoutServiceSaveNoteResponse saveNote(Long id) {
-        Note note = noteRepository.save(Note.builder().userId(id).build());
+    public WorkoutServiceSaveNoteResponse saveNote(Long userId) {
+        Note note = noteRepository.save(Note.builder().userId(userId).build());
 
         return WorkoutServiceSaveNoteResponse.builder()
                 .noteId(note.getNoteId())
@@ -81,7 +80,7 @@ public class WorkoutServiceImp implements WorkoutService {
     public String saveWorkout(WorkoutServiceSaveWorkoutRequest request) {
         int totalScore = 0;
 
-        Note note = noteRepository.findById(request.getNoteId()).orElseThrow(() -> new RuntimeException("노트 찾기 오류"));
+        Note note = noteRepository.findById(request.getNoteId()).orElseThrow(() -> new NoteException("노트 찾기 오류"));
 
         for (WorkoutVO workoutVO : request.getWorkoutList()) {
             Workout workout = new Workout();

@@ -73,6 +73,13 @@ public class ExceptionController {
         return makeResponse(e.getMessage(), ErrorCode.DIET_ERROR.getCode());
     }
 
+    @ExceptionHandler({NoteException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse noteSaveException(final NoteException e) {
+        log.error("노트 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.NOTESAVE_ERROR.getCode());
+    }
+
 
 
 

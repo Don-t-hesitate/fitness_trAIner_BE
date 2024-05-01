@@ -51,15 +51,14 @@ public class WorkoutController {
                         .build()))
                 .build();
     }
-    //TODO 노트 업로드 필요
-    @PostMapping("/note/{id}")
+    @PostMapping("/note/{userId}")
     @Operation(summary = "운동일지 업로드", description = "유저 노트 생성(유저 운동 시작시)")
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = WorkoutServiceSaveNoteResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<WorkoutServiceSaveNoteResponse> uploadUserNote(@PathVariable Long id) {
+    public final GlobalResponse<WorkoutServiceSaveNoteResponse> uploadUserNote(@PathVariable Long userId) {
         return GlobalResponse.<WorkoutServiceSaveNoteResponse>builder()
                 .message("유저 운동일지 생성")
-                .result(workoutService.saveNote(id))
+                .result(workoutService.saveNote(userId))
                 .build();
     }
 
@@ -80,6 +79,7 @@ public class WorkoutController {
     }
 
 
+    //FIXME 서비스로직으로 이동 필요
     @RequestMapping(value = "/video/{workoutVideoId}", method = RequestMethod.GET)
     @Operation(summary = "영상 스트리밍 테스트", description = "스트리밍 테스트를 위한 임시 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
