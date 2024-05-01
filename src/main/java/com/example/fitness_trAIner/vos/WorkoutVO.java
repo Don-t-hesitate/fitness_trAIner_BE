@@ -8,7 +8,10 @@ import lombok.Setter;
 @Setter
 @RequiredArgsConstructor
 public class WorkoutVO {
-    private String exerciseName;
     private int setNum;
     private int repeats;
+    private int weight;
+    private int scorePerfect;
+    private int scoreGood;
+    private int scoreBad;
 }

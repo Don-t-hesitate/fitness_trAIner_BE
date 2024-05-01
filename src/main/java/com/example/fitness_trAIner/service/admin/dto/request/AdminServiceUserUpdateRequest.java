@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class AdminServiceUserUpdateRequest {
-    private Long id;
+    private Long userId;
     private String nickname;
     private Float height;
     private Float weight;

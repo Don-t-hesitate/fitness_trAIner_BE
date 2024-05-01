@@ -10,9 +10,8 @@ import java.util.List;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class WorkoutSaveWokroutRequestBody {
+    private Long userId;
     private Long noteId;
-    private int scoreCool;
-    private int scoreGood;
-    private int scoreNotgood;
+    private String exerciseName;
     private List<WorkoutVO> workoutList;
 }

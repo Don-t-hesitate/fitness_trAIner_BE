@@ -62,7 +62,7 @@ public class AdminController {
         return GlobalResponse.<String>builder()
                 .message("사용자 정보 수정")
                 .result(adminService.adminUpdateUser(AdminServiceUserUpdateRequest.builder()
-                        .id(requestBody.getId())
+                        .userId(requestBody.getUserId())
                         .nickname(requestBody.getNickname())
                         .height(requestBody.getHeight())
                         .weight(requestBody.getWeight())

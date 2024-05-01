@@ -11,9 +11,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class WorkoutServiceSaveWorkoutRequest {
+    private Long userId;
     private Long noteId;
-    private Integer scoreCool;
-    private Integer scoreGood;
-    private Integer scoreNotgood;
+    private String exerciseName;
     private List<WorkoutVO> workoutList;
 }

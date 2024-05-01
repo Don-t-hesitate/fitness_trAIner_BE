@@ -31,17 +31,11 @@ public class Note {
     @CreatedDate
     private LocalDate workoutDate;
     @Column(name = "total_score")
-    private Integer totalScore;
+    private int totalScore;
     @Column(name = "total_kcal")
-    private Integer totalKcal;
+    private int totalKcal;
     @Column(name = "total_set")
-    private Integer totalSet;
-    @Column(name = "score_cool")
-    private Integer scoreCool;
-    @Column(name = "score_good")
-    private Integer scoreGood;
-    @Column(name = "score_notgood")
-    private Integer scoreNotgood;
+    private int totalSet;
 
 
 

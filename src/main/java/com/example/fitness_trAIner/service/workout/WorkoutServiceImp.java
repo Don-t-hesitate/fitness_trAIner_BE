@@ -1,6 +1,9 @@
 package com.example.fitness_trAIner.service.workout;
 
 import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
+import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
+import com.example.fitness_trAIner.repository.user.UserScore;
+import com.example.fitness_trAIner.repository.user.UserScoreRepository;
 import com.example.fitness_trAIner.repository.workout.*;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveVideoRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveWorkoutRequest;
@@ -28,6 +31,7 @@ public class WorkoutServiceImp implements WorkoutService {
     private final NoteRepository noteRepository;
     private final WorkoutRepository workoutRepository;
     private final WorkoutVideoRepository workoutVideoRepository;
+    private final UserScoreRepository userScoreRepository;
     @Value("${videopath.user}")
     private String uploadDir;
 //    private String uploadDir = "C:\\video";
@@ -75,15 +79,32 @@ public class WorkoutServiceImp implements WorkoutService {
 
     @Override
     public String saveWorkout(WorkoutServiceSaveWorkoutRequest request) {
+        int totalScore = 0;
+
+        Note note = noteRepository.findById(request.getNoteId()).orElseThrow(() -> new RuntimeException("노트 찾기 오류"));
 
         for (WorkoutVO workoutVO : request.getWorkoutList()) {
             Workout workout = new Workout();
             workout.setNoteId(request.getNoteId());
-            workout.setExerciseName(workoutVO.getExerciseName());
+            workout.setExerciseName(request.getExerciseName());
             workout.setSetNum(workoutVO.getSetNum());
             workout.setRepeats(workoutVO.getRepeats());
+            workout.setWeight(workoutVO.getWeight());
+            totalScore += (workoutVO.getRepeats() * (workoutVO.getScorePerfect() * 3 + workoutVO.getScoreGood() * 2 + workoutVO.getScoreBad()) *
+                    (1 + (workoutVO.getWeight() / 100)));
             workoutRepository.save(workout);
         }
+
+
+
+        userScoreRepository.save(UserScore.builder()
+                .userId(request.getUserId())
+                .exerciseName(request.getExerciseName())
+                .score(totalScore)
+                .build());
+
+        note.setTotalScore(note.getTotalScore() + totalScore);
+        noteRepository.save(note);
 
         return "운동 내용 업로드 성공";
     }

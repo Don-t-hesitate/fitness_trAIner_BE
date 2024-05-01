@@ -73,7 +73,7 @@ public class AdminServiceImp implements AdminService{
 
     @Override
     public String adminUpdateUser(AdminServiceUserUpdateRequest request) {
-        User user = userRepository.findById(request.getId()).orElseThrow(()->new NoUserException("유저 조회 오류 updateUser"));
+        User user = userRepository.findById(request.getUserId()).orElseThrow(()->new NoUserException("유저 조회 오류 updateUser"));
 
         if (!request.getNickname().equals(user.getNickname())) {
             Boolean isExistNickname = userRepository.existsByNickname(request.getNickname());

@@ -26,10 +26,11 @@ public class Workout {
     @Column(name = "exercise_name")
     private String exerciseName;
     @Column(name = "set_num")
-    private Integer setNum;
+    private int setNum;
     @Column(name = "repeats")
-    private Integer repeats;
-
+    private int repeats;
+    @Column(name = "weight")
+    private int weight;
 
 
 }
