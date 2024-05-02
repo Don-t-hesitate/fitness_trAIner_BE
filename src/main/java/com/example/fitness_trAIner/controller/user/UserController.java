@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-//TODO Schema 수정
 @RequestMapping("/users")
 @Tag(name = "User", description = "유저 관련 API")
 @RequiredArgsConstructor
@@ -40,6 +39,7 @@ public class UserController {
                         .height(requestBody.getHeight())
                         .weight(requestBody.getWeight())
                         .age(requestBody.getAge())
+                        .gender(requestBody.getGender())
                         .spicyPreference(requestBody.getSpicyPreference())
                         .meatConsumption(requestBody.getMeatConsumption())
                         .tastePreference(requestBody.getTastePreference())
@@ -88,6 +88,7 @@ public class UserController {
                         .height(requestBody.getHeight())
                         .weight(requestBody.getWeight())
                         .age(requestBody.getAge())
+                        .gender(requestBody.getGender())
                         .spicyPreference(requestBody.getSpicyPreference())
                         .meatConsumption(requestBody.getMeatConsumption())
                         .tastePreference(requestBody.getTastePreference())

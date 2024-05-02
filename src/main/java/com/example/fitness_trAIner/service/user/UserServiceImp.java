@@ -45,6 +45,7 @@ public class UserServiceImp implements UserService {
                     .height(request.getHeight())
                     .weight(request.getWeight())
                     .age(request.getAge())
+                    .gender(request.getGender())
                     .spicyPreference(request.getSpicyPreference())
                     .meatConsumption(request.getMeatConsumption())
                     .tastePreference(request.getTastePreference())
@@ -84,6 +85,7 @@ public class UserServiceImp implements UserService {
                 .height(user.getHeight())
                 .weight(user.getWeight())
                 .age(user.getAge())
+                .gender(user.getGender())
                 .spicyPreference(user.getSpicyPreference())
                 .meatConsumption(user.getMeatConsumption())
                 .tastePreference(user.getTastePreference())
@@ -106,6 +108,7 @@ public class UserServiceImp implements UserService {
         user.setHeight(request.getHeight());
         user.setWeight(request.getWeight());
         user.setAge(request.getAge());
+        user.setGender(request.getGender());
         user.setSpicyPreference(request.getSpicyPreference());
         user.setMeatConsumption(request.getMeatConsumption());
         user.setTastePreference(request.getTastePreference());

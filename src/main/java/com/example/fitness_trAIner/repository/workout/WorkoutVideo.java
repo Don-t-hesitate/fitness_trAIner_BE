@@ -28,6 +28,8 @@ public class WorkoutVideo {
 
     @Column(name = "note_id", nullable = false)
     private Long noteId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
     @Column(name = "file_name")
     private String fileName;
     @Column(name = "exercise_name")

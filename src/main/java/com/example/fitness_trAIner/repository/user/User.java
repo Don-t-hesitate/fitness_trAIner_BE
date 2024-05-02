@@ -36,6 +36,8 @@ public class User {
     private Integer age;
     @Column(name = "role")
     private String role;
+    @Column(name = "gender")
+    private String gender;
     @Column(name = "spicy_preference")
     private Integer spicyPreference;
     @Column(name = "meat_consumption")

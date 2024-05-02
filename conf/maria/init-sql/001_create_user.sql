@@ -7,6 +7,7 @@ create table user
     height                          float,
     weight                          float,
     age                             integer,
+    gender                          varchar(50),
     role                            varchar(50),
     spicy_preference                integer,
     meat_consumption                bool,
@@ -19,7 +20,7 @@ create table user
 
 
 INSERT INTO user (username, password, nickname, height,
-                  weight, age, role, spicy_preference, meat_consumption, taste_preference,
+                  weight, age, gender, role, spicy_preference, meat_consumption, taste_preference,
                   activity_level, preference_type_food)
 VALUES ('admin_username', '$2a$10$D1GNQmvoBt2nm7lj3Rbm/eY4SLSFEt585w9xEz0uhNJlMRJg1gzGG', 'Admin',
-        175.5, 70.3, 30, 'ADMIN', 3, TRUE, '쓴맛', 3, '한식');
+        175.5, 70.3, 30, 'male','ADMIN', 3, TRUE, '쓴맛', 3, '한식');

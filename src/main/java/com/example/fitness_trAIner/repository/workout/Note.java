@@ -36,6 +36,12 @@ public class Note {
     private int totalKcal;
     @Column(name = "total_set")
     private int totalSet;
+    @Column(name = "total_perfect")
+    private int totalPerfect;
+    @Column(name = "total_good")
+    private int totalGood;
+    @Column(name = "total_bad")
+    private int totalBad;
 
 
 

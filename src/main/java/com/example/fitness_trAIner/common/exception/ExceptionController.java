@@ -80,6 +80,13 @@ public class ExceptionController {
         return makeResponse(e.getMessage(), ErrorCode.NOTESAVE_ERROR.getCode());
     }
 
+    @ExceptionHandler({ScoreException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse scoreException(final ScoreException e) {
+        log.error("점수 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.SCORE_ERROR.getCode());
+    }
+
 
 
 

@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class WorkoutSaveWokroutRequestBody {
-    private Long userId;
     private Long noteId;
     private String exerciseName;
     private List<WorkoutVO> workoutList;

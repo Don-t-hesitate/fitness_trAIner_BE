@@ -1,17 +1,17 @@
 package com.example.fitness_trAIner.service.workout.dto.request;
 
-import com.example.fitness_trAIner.vos.WorkoutVO;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Date;
+
 @Getter
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class WorkoutServiceSaveWorkoutRequest {
-    private Long noteId;
-    private String exerciseName;
-    private List<WorkoutVO> workoutList;
+public class WorkoutServiceFindNoteListRequest {
+    private Long userId;
+    private LocalDate date;
 }

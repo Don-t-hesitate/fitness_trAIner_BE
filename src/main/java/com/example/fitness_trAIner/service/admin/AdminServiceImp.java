@@ -85,6 +85,7 @@ public class AdminServiceImp implements AdminService{
         user.setHeight(request.getHeight());
         user.setWeight(request.getWeight());
         user.setAge(request.getAge());
+        user.setGender(request.getGender());
         user.setSpicyPreference(request.getSpicyPreference());
         user.setMeatConsumption(request.getMeatConsumption());
         user.setTastePreference(request.getTastePreference());
