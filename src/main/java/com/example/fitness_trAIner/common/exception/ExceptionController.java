@@ -87,6 +87,13 @@ public class ExceptionController {
         return makeResponse(e.getMessage(), ErrorCode.SCORE_ERROR.getCode());
     }
 
+    @ExceptionHandler({ExerciseException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse exerciseException(final ExerciseException e) {
+        log.error("예시 운동 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.EXERCISE_ERROR.getCode());
+    }
+
 
 
 

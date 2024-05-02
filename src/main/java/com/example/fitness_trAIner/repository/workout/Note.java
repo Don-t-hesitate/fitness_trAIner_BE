@@ -34,8 +34,6 @@ public class Note {
     private int totalScore;
     @Column(name = "total_kcal")
     private int totalKcal;
-    @Column(name = "total_set")
-    private int totalSet;
     @Column(name = "total_perfect")
     private int totalPerfect;
     @Column(name = "total_good")

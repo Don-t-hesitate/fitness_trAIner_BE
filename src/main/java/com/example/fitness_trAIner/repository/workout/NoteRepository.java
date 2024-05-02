@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NoteRepository extends JpaRepository<Note, Long> {
@@ -12,5 +13,5 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     List<Note> findAllByUserIdAndWorkoutDate(Long userId, LocalDate workoutDate);
     boolean existsByUserId(Long userId);
     boolean existsByNoteId(Long noteId);
-    Note findByNoteId(Long noteId);
+    Optional<Note> findByNoteId(Long noteId);
 }

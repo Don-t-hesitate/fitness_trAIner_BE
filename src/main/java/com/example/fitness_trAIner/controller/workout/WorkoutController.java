@@ -10,6 +10,7 @@ import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceFin
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveVideoRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveWorkoutRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceVideoStreamRequest;
+import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindNoteDetailResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindNoteListResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindVideoListResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceSaveNoteResponse;
@@ -43,7 +44,7 @@ public class WorkoutController {
     private final WorkoutService workoutService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "video/{noteId}/{exerciseName}")
-    @Operation(summary = "동영상 업로드", description = "유저 개인운동영상 업로드.")
+    @Operation(summary = "동영상 업로드", description = "유저 개인운동영상 업로드(운동이 끝난후, 운동일지 업로드가 된상태면 업로드 가능) 테스트단계에서는 C:/video/workout 이경로에 저장")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<String> uploadUserVideo(@RequestPart MultipartFile file, @PathVariable Long noteId, @PathVariable String exerciseName) {
@@ -177,12 +178,22 @@ public class WorkoutController {
 
     @GetMapping("/video/{noteId}")
     @Operation(summary = "운동 영상 리스트 조회", description = "노트 아이디를 사용한 영상 리스트 조회")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = WorkoutServiceFindVideoListResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<WorkoutServiceFindVideoListResponse> findNoteListByDate(@PathVariable Long noteId) {
         return GlobalResponse.<WorkoutServiceFindVideoListResponse>builder()
                 .message("운동 영상 리스트 조회")
                 .result(workoutService.findWorkoutVideoListByNoteId(noteId))
+                .build();
+    }
+    @GetMapping("/note/{noteId}")
+    @Operation(summary = "운동 일지 상세조회", description = "노트 아이디를 사용한 노트 상세조회")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = WorkoutServiceFindNoteDetailResponse.class)))
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<WorkoutServiceFindNoteDetailResponse> findNoteDetail(@PathVariable Long noteId) {
+        return GlobalResponse.<WorkoutServiceFindNoteDetailResponse>builder()
+                .message("운동일지 상세조회")
+                .result(workoutService.findNoteDetail(noteId))
                 .build();
     }
 }

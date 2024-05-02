@@ -4,6 +4,7 @@ import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceFin
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveVideoRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveWorkoutRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceVideoStreamRequest;
+import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindNoteDetailResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindNoteListResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindVideoListResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceSaveNoteResponse;
@@ -19,5 +20,6 @@ public interface WorkoutService {
     public String saveWorkout(WorkoutServiceSaveWorkoutRequest request);
     public void workoutVideoStream(WorkoutServiceVideoStreamRequest request) throws IOException;
     public WorkoutServiceFindVideoListResponse findWorkoutVideoListByNoteId(Long noteId);
+    public WorkoutServiceFindNoteDetailResponse findNoteDetail(Long noteId);
 
 }

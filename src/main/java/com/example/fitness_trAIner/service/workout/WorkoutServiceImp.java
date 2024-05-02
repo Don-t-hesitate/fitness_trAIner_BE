@@ -1,9 +1,8 @@
 package com.example.fitness_trAIner.service.workout;
 
-import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
-import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
-import com.example.fitness_trAIner.common.exception.exceptions.NoteException;
-import com.example.fitness_trAIner.common.exception.exceptions.ScoreException;
+import com.example.fitness_trAIner.common.exception.exceptions.*;
+import com.example.fitness_trAIner.repository.exercise.Exercise;
+import com.example.fitness_trAIner.repository.exercise.ExerciseRepository;
 import com.example.fitness_trAIner.repository.user.User;
 import com.example.fitness_trAIner.repository.user.UserRepository;
 import com.example.fitness_trAIner.repository.user.UserScore;
@@ -13,6 +12,7 @@ import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceFin
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveVideoRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceSaveWorkoutRequest;
 import com.example.fitness_trAIner.service.workout.dto.request.WorkoutServiceVideoStreamRequest;
+import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindNoteDetailResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindNoteListResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceFindVideoListResponse;
 import com.example.fitness_trAIner.service.workout.dto.response.WorkoutServiceSaveNoteResponse;
@@ -43,6 +43,8 @@ public class WorkoutServiceImp implements WorkoutService {
     private final WorkoutVideoRepository workoutVideoRepository;
     private final UserScoreRepository userScoreRepository;
     private final UserRepository userRepository;
+    private final ExerciseRepository exerciseRepository;
+
     @Value("${videopath.user}")
     private String uploadDir;
 
@@ -53,7 +55,7 @@ public class WorkoutServiceImp implements WorkoutService {
             throw new FileStoreException("존재하지않는 노트");
         }
 
-        Note note = noteRepository.findByNoteId(request.getNoteId());
+        Note note = noteRepository.findByNoteId(request.getNoteId()).orElseThrow(() -> new NoteException("노트 조회 오류"));
 
         if (!file.getContentType().equals("video/mp4")) {
             log.error("파일 확장자 에러");
@@ -115,9 +117,12 @@ public class WorkoutServiceImp implements WorkoutService {
 
     @Override
     public String saveWorkout(WorkoutServiceSaveWorkoutRequest request) {
-        Note note = noteRepository.findById(request.getNoteId()).orElseThrow(() -> new NoteException("노트 찾기 오류"));
+        Note note = noteRepository.findByNoteId(request.getNoteId()).orElseThrow(() -> new NoteException("노트 찾기 오류"));
         User user = userRepository.findById(note.getUserId()).orElseThrow(() -> new NoUserException("유저 찾기 오류"));
+        Exercise exercise = exerciseRepository.findByExerciseName(request.getExerciseName()).orElseThrow(()-> new ExerciseException("해당 운동 없음"));
+
         int totalScore = 0;
+        int totalKcal = 0;
         int totalPerfect = note.getTotalPerfect();
         int totalGood = note.getTotalGood();
         int totalBad = note.getTotalBad();
@@ -140,9 +145,11 @@ public class WorkoutServiceImp implements WorkoutService {
                 } else {
                     workout.setWeight(workoutVO.getWeight());
                 }
+                ////////////////////////////////////////////////
                 totalPerfect += workoutVO.getScorePerfect();
                 totalGood += workoutVO.getScoreGood();
                 totalBad += workoutVO.getScoreBad();
+                totalKcal += workoutVO.getRepeats() * exercise.getPerKcal();
                 if (workoutVO.getRepeats() > 0) {
                     totalScore += (workoutVO.getRepeats() * (workoutVO.getScorePerfect() * 3 + workoutVO.getScoreGood() * 2 + workoutVO.getScoreBad()) *
                             (1 + (workoutVO.getWeight() / 100)));
@@ -155,12 +162,23 @@ public class WorkoutServiceImp implements WorkoutService {
 
 
         try {
-            userScoreRepository.save(UserScore.builder()
+
+            UserScore userScore = (userScoreRepository.existsByUserIdAndExerciseName(note.getUserId(), request.getExerciseName()))
+                    ? userScoreRepository.findByUserIdAndExerciseName(note.getUserId(), request.getExerciseName()).orElseThrow(()-> new ScoreException("점수 DB조회 오류"))
+                    : userScoreRepository.save(UserScore.builder()
                     .userId(note.getUserId())
                     .exerciseName(request.getExerciseName())
                     .score(totalScore)
                     .build());
 
+            if (userScore.getScore() < totalScore) {
+                userScore.setScore(totalScore);
+                userScoreRepository.save(userScore);
+            }
+
+
+
+            note.setTotalKcal(note.getTotalKcal() + totalKcal);
             note.setTotalScore(note.getTotalScore() + totalScore);
             note.setTotalPerfect(totalPerfect);
             note.setTotalGood(totalGood);
@@ -245,6 +263,22 @@ public class WorkoutServiceImp implements WorkoutService {
         List<WorkoutVideo> workoutVideoList = workoutVideoRepository.findAllByNoteId(noteId);
         return WorkoutServiceFindVideoListResponse.builder()
                 .workoutVideoList(workoutVideoList)
+                .build();
+    }
+
+    @Override
+    public WorkoutServiceFindNoteDetailResponse findNoteDetail(Long noteId) {
+        Note note = noteRepository.findByNoteId(noteId).orElseThrow(() -> new NoteException("노트 찾기 오류"));
+        List<Workout> workoutList = workoutRepository.findAllByNoteId(noteId);
+
+
+        return WorkoutServiceFindNoteDetailResponse.builder()
+                .totalKcal(note.getTotalKcal())
+                .totalScore(note.getTotalScore())
+                .totalPerfect(note.getTotalPerfect())
+                .totalGood(note.getTotalGood())
+                .totalBad(note.getTotalBad())
+                .workoutList(workoutList)
                 .build();
     }
 
