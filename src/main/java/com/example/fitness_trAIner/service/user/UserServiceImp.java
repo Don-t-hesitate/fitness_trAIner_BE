@@ -46,6 +46,7 @@ public class UserServiceImp implements UserService {
                     .height(request.getHeight())
                     .weight(request.getWeight())
                     .age(request.getAge())
+                    .gender(request.getGender())
                     .spicyPreference(request.getSpicyPreference())
                     .meatConsumption(request.getMeatConsumption())
                     .tastePreference(request.getTastePreference())
@@ -71,7 +72,7 @@ public class UserServiceImp implements UserService {
         if (!bCryptPasswordEncoder.matches(request.getPassword(), user.getPassword()))
                 throw new LoginFailException("비밀번호 불일치");
 
-        return UserServiceLoginResponse.builder().id(user.getId()).build();
+        return UserServiceLoginResponse.builder().id(user.getUserId()).build();
     }
 
     @Override
@@ -85,6 +86,7 @@ public class UserServiceImp implements UserService {
                 .height(user.getHeight())
                 .weight(user.getWeight())
                 .age(user.getAge())
+                .gender(user.getGender())
                 .spicyPreference(user.getSpicyPreference())
                 .meatConsumption(user.getMeatConsumption())
                 .tastePreference(user.getTastePreference())
@@ -107,6 +109,7 @@ public class UserServiceImp implements UserService {
         user.setHeight(request.getHeight());
         user.setWeight(request.getWeight());
         user.setAge(request.getAge());
+        user.setGender(request.getGender());
         user.setSpicyPreference(request.getSpicyPreference());
         user.setMeatConsumption(request.getMeatConsumption());
         user.setTastePreference(request.getTastePreference());
@@ -125,7 +128,7 @@ public class UserServiceImp implements UserService {
     public String deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(()->new NoUserException("유저 조회 오류 deleteUser"));
 
-        userRepository.deleteById(user.getId());
+        userRepository.deleteById(user.getUserId());
         return "사용자 탈퇴 성공";
     }
 
