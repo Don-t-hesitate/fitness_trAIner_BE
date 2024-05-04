@@ -18,7 +18,7 @@ public class User {
     @Id
     @Column(name = "user_id", updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
 
 
@@ -28,12 +28,14 @@ public class User {
     private String password;
     @Column(name = "nickname", nullable = false)
     private String nickname;
-    @Column(name = "height")
+    @Column(name = "height", nullable = false)
     private Float height;
-    @Column(name = "weight")
+    @Column(name = "weight", nullable = false)
     private Float weight;
-    @Column(name = "age")
+    @Column(name = "age", nullable = false)
     private Integer age;
+    @Column(name = "gender", nullable = false)
+    private String gender;
     @Column(name = "role")
     private String role;
     @Column(name = "spicy_preference")
@@ -42,7 +44,7 @@ public class User {
     private Boolean meatConsumption;
     @Column(name = "taste_preference")
     private String tastePreference;
-    @Column(name = "activity_level")
+    @Column(name = "activity_level", nullable = false)
     private Integer activityLevel;
     @Column(name = "preference_type_food")
     private String preferenceTypeFood;

@@ -13,6 +13,7 @@ public class UserServiceDetailInfoResponse {
     private Float height;
     private Float weight;
     private Integer age;
+    private String gender;
     private Integer spicyPreference;
     private Boolean meatConsumption;
     private String tastePreference;

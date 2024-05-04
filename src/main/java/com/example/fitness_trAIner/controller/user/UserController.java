@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 @RequestMapping("/users")
 @Tag(name = "User", description = "유저 관련 API")
 @RequiredArgsConstructor
@@ -25,12 +24,11 @@ public class UserController {
 
     @PostMapping("/signup")
     @Operation(summary = "회원가입", description = "유저 회원가입 API")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = UserServiceSignupResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<UserServiceSignupResponse> saveUser(@RequestBody UserSignupRequestBody requestBody) {
 
-        System.out.println(requestBody.getHeight());
-        System.out.println(requestBody.getWeight());
+
         return GlobalResponse.<UserServiceSignupResponse>builder()
                 .message("유저 회원가입")
                 .result(userService.signupUser(UserServiceSignupRequest.builder()
@@ -40,6 +38,7 @@ public class UserController {
                         .height(requestBody.getHeight())
                         .weight(requestBody.getWeight())
                         .age(requestBody.getAge())
+                        .gender(requestBody.getGender())
                         .spicyPreference(requestBody.getSpicyPreference())
                         .meatConsumption(requestBody.getMeatConsumption())
                         .tastePreference(requestBody.getTastePreference())
@@ -51,6 +50,8 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "유저 로그인 API")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = UserServiceLoginResponse.class)))
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<UserServiceLoginResponse> loginUser(@RequestBody UserLoginRequestBody requestBody) {
 
         return GlobalResponse.<UserServiceLoginResponse>builder()
@@ -64,7 +65,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "아이디로 유저 조회", description = "유저 조회")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true, content = @Content(schema = @Schema(implementation =  UserServiceDetailInfoResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<UserServiceDetailInfoResponse> findById(@PathVariable Long id) {
         return GlobalResponse.<UserServiceDetailInfoResponse>builder()
@@ -81,11 +82,12 @@ public class UserController {
         return GlobalResponse.<String>builder()
                 .message("사용자 정보 수정")
                 .result(userService.updateUser(UserServiceUpdateRequest.builder()
-                        .id(requestBody.getId())
+                        .id(requestBody.getUserId())
                         .nickname(requestBody.getNickname())
                         .height(requestBody.getHeight())
                         .weight(requestBody.getWeight())
                         .age(requestBody.getAge())
+                        .gender(requestBody.getGender())
                         .spicyPreference(requestBody.getSpicyPreference())
                         .meatConsumption(requestBody.getMeatConsumption())
                         .tastePreference(requestBody.getTastePreference())

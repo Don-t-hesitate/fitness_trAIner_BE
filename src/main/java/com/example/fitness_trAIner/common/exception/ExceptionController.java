@@ -61,7 +61,7 @@ public class ExceptionController {
 
     @ExceptionHandler({FileStoreException.class})
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public final GlobalExceptionResponse fileStorefailException(final FileStoreException e) {
+    public final GlobalExceptionResponse fileStoreFailException(final FileStoreException e) {
         log.error(ErrorCode.FILESTORE_ERROR.getMessage(), e);
         return makeResponse(e.getMessage(), ErrorCode.FILESTORE_ERROR.getCode());
     }
@@ -71,6 +71,27 @@ public class ExceptionController {
     public final GlobalExceptionResponse invalidCategoryException(final InvalidCategoryException e) {
         log.error("유효하지 않은 카테고리", e);
         return makeResponse(e.getMessage(), ErrorCode.DIET_ERROR.getCode());
+    }
+
+    @ExceptionHandler({NoteException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse noteSaveException(final NoteException e) {
+        log.error("노트 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.NOTESAVE_ERROR.getCode());
+    }
+
+    @ExceptionHandler({ScoreException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse scoreException(final ScoreException e) {
+        log.error("점수 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.SCORE_ERROR.getCode());
+    }
+
+    @ExceptionHandler({ExerciseException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse exerciseException(final ExerciseException e) {
+        log.error("예시 운동 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.EXERCISE_ERROR.getCode());
     }
 
 
