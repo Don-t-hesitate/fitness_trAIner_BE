@@ -101,7 +101,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/workouts/{wokroutVideoId}")
-    @Operation(summary = "사용자 탈퇴", description = "사용자 탈퇴")
+    @Operation(summary = "사용자 운동 영상 삭제", description = "사용자 운동영상 삭제")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<String> deleteWorkoutVideo(@PathVariable Long wokroutVideoId) {

@@ -134,18 +134,12 @@ public class WorkoutServiceImp implements WorkoutService {
                 workout.setSetNum(workoutVO.getSetNum());
                 workout.setRepeats(workoutVO.getRepeats());
                 
-                //FIXME 몸무게 nullable 확인후 수정
                 if (workoutVO.getWeight() == 0) {
-                    if (user.getWeight() == null)
-                        workout.setWeight(70);
-                    else {
-                        workout.setWeight(user.getWeight().intValue());
-                    }
+                    workout.setWeight(user.getWeight().intValue());
 
                 } else {
                     workout.setWeight(workoutVO.getWeight());
                 }
-                ////////////////////////////////////////////////
                 totalPerfect += workoutVO.getScorePerfect();
                 totalGood += workoutVO.getScoreGood();
                 totalBad += workoutVO.getScoreBad();

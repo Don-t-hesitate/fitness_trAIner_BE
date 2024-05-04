@@ -1,18 +1,18 @@
 create table user
 (
-    user_id                         integer not null auto_increment primary key,
+    user_id                         BIGINT not null auto_increment primary key,
     username                        varchar(100) not null unique,
     password                        varchar(100) not null,
     nickname                        varchar(50) not null unique,
-    height                          float,
-    weight                          float,
-    age                             integer,
-    gender                          varchar(50),
+    height                          float not null,
+    weight                          float not null,
+    age                             integer not null,
+    gender                          varchar(50) not null,
     role                            varchar(50),
     spicy_preference                integer,
     meat_consumption                bool,
     taste_preference                varchar(50),
-    activity_level                  integer,
+    activity_level                  integer not null,
     preference_type_food            varchar(50)
 
 

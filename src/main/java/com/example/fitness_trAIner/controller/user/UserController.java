@@ -28,8 +28,7 @@ public class UserController {
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<UserServiceSignupResponse> saveUser(@RequestBody UserSignupRequestBody requestBody) {
 
-        System.out.println(requestBody.getHeight());
-        System.out.println(requestBody.getWeight());
+
         return GlobalResponse.<UserServiceSignupResponse>builder()
                 .message("유저 회원가입")
                 .result(userService.signupUser(UserServiceSignupRequest.builder()

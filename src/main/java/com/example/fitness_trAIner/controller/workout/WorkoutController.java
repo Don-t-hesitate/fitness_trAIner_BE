@@ -70,7 +70,7 @@ public class WorkoutController {
     }
 
     @PostMapping("/note/workout")
-    @Operation(summary = "운동 내용 업로드", description = "운동 결과 일지에 업로드(해당운동의 세트가 모두 끝난후)")
+    @Operation(summary = "운동 내용 업로드", description = "운동 결과 일지에 업로드(해당운동의 세트가 모두 끝난후) 운동 중량을 입력하지않는 경우(맨몸운동) 몸무게를 사용해 점수 계산")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<String> uploadUserNote(@RequestBody WorkoutSaveWokroutRequestBody requestBody) {
