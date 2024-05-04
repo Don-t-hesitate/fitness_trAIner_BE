@@ -55,14 +55,13 @@ public class ScoreServiceImp implements ScoreService {
 
         Long userRanking = userScoreRepository.countByExerciseNameAndScoreGreaterThanEqual(exerciseName, userScore.getScore());
 
-        UserScoreVO userScoreVO = new UserScoreVO();
-        userScoreVO.setNickname(user.getNickname());
-        userScoreVO.setScore(userScore.getScore());
+
 
         return ScoreServiceUserRankingResponse.builder()
                 .exerciseName(userScore.getExerciseName())
                 .ranking(userRanking)
-                .userScoreVO(userScoreVO)
+                .nickname(user.getNickname())
+                .score(userScore.getScore())
                 .build();
     }
 }

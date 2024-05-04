@@ -10,6 +10,7 @@ import lombok.*;
 public class ScoreServiceUserRankingResponse {
     private String exerciseName;
     private Long ranking;
-    private UserScoreVO userScoreVO;
+    private String nickname;
+    private int score;
 
 }
