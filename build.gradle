@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id "com.github.node-gradle.node" version "3.5.1"
 }
 
 group = 'com.example'
@@ -85,4 +86,31 @@ tasks.named('test') {
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
     dependsOn test
+}
+
+// ---------------react 앱 설치를 위한 npm 태스크 추가----------------
+
+node {
+    version = "18.17.1" //사용하고자 하는 노드 버전
+    download = true
+}
+
+def frontDir = "$projectDir/src/main/frontend"
+
+npmInstall.configure{
+    // react 앱 설치
+    args = ['install', '--legacy-peer-deps']
+    workingDir = file("${frontDir}/react-app")
+}
+
+task buildReact(type: NpmTask, dependsOn: 'npmInstall') { // buildReact 태스크에 installReactDeps 의존성 추가
+    // react 앱 빌드
+    workingDir = file("${frontDir}/react-app")
+    args = ["run", "build"]
+}
+
+task copyReactBuild(type: Copy, dependsOn: 'buildReact') { // copyReactBuild 태스크에 buildReact 의존성 추가
+    // react 앱 빌드 결과물을 스프링부트 resource 디렉토리로 복사
+    from 'react-app/build'
+    into 'src/main/resources/static'
 }
