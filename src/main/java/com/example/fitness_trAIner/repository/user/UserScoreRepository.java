@@ -12,4 +12,6 @@ public interface UserScoreRepository extends JpaRepository<UserScore, Long> {
     boolean existsByUserIdAndExerciseName(Long userId, String exerciseName);
 
     List<UserScore> findTop10ByExerciseNameOrderByScoreDesc(String exerciseName);
+
+    Long countByExerciseNameAndScoreGreaterThanEqual(String exerciseName, int score);
 }

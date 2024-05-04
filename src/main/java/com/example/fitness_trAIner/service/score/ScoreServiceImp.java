@@ -1,11 +1,13 @@
 package com.example.fitness_trAIner.service.score;
 
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
+import com.example.fitness_trAIner.common.exception.exceptions.ScoreException;
 import com.example.fitness_trAIner.repository.user.User;
 import com.example.fitness_trAIner.repository.user.UserRepository;
 import com.example.fitness_trAIner.repository.user.UserScore;
 import com.example.fitness_trAIner.repository.user.UserScoreRepository;
 import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceTop10Response;
+import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceUserRankingResponse;
 import com.example.fitness_trAIner.vos.UserScoreVO;
 import com.example.fitness_trAIner.vos.UserVO;
 import lombok.AccessLevel;
@@ -42,6 +44,25 @@ public class ScoreServiceImp implements ScoreService {
 
         return ScoreServiceTop10Response.builder()
                 .userScoreVOList(userScoreVOList)
+                .build();
+    }
+
+    @Override
+    public ScoreServiceUserRankingResponse findUserRanking(String exerciseName, Long userId) {
+        UserScore userScore = userScoreRepository.findByUserIdAndExerciseName(userId, exerciseName).orElseThrow(()-> new ScoreException("userId와 운동이름에 해당하는 점수 없음"));
+
+        User user = userRepository.findById(userId).orElseThrow(()->new NoUserException("userId에 해당하는 유저 없음 findUserRanking"));
+
+        Long userRanking = userScoreRepository.countByExerciseNameAndScoreGreaterThanEqual(exerciseName, userScore.getScore());
+
+        UserScoreVO userScoreVO = new UserScoreVO();
+        userScoreVO.setNickname(user.getNickname());
+        userScoreVO.setScore(userScore.getScore());
+
+        return ScoreServiceUserRankingResponse.builder()
+                .exerciseName(userScore.getExerciseName())
+                .ranking(userRanking)
+                .userScoreVO(userScoreVO)
                 .build();
     }
 }
