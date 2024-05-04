@@ -13,7 +13,8 @@ create table user
     meat_consumption                bool,
     taste_preference                varchar(50),
     activity_level                  integer not null,
-    preference_type_food            varchar(50)
+    preference_type_food            varchar(50),
+
 
 
 );
