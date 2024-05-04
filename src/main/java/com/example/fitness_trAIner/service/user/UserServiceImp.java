@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -146,6 +147,15 @@ public class UserServiceImp implements UserService {
         user.setPassword(bCryptPasswordEncoder.encode(request.getNewPassword()));
 
         return "비밀번호 변경 성공";
+    }
+
+    @Override
+    public void resetAttendance() {
+        List<User> users = userRepository.findAll();
+        for (User user: users) {
+            user.setAttendanceCheck(false);
+            userRepository.save(user);
+        }
     }
 
 

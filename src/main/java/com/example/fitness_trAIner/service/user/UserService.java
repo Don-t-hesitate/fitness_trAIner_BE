@@ -13,5 +13,6 @@ public interface UserService {
     public String deleteUser(Long id);
     public String findUsername(UserServiceFindUsernameRequest request);
     public String changePassword(UserServiceChangePasswordRequest request);
+    public void resetAttendance();
 
 }

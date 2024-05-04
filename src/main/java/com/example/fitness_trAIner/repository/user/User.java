@@ -48,7 +48,8 @@ public class User {
     private Integer activityLevel;
     @Column(name = "preference_type_food")
     private String preferenceTypeFood;
-
+    @Column(name = "attendance_check")
+    private boolean attendanceCheck;
 
 
 
