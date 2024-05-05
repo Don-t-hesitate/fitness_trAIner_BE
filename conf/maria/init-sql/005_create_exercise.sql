@@ -8,7 +8,7 @@ create table exercise
 
 );
 
-
+-- 테스트용 임시 쿼리
 INSERT INTO exercise (exercise_name, per_kcal, exercise_type)
 VALUES ('푸쉬업', 8, '');
 INSERT INTO exercise (exercise_name, per_kcal, exercise_type)

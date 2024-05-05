@@ -3,6 +3,7 @@ package com.example.fitness_trAIner.controller.score;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.service.score.ScoreService;
+import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceScoreListResponse;
 import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceTop10Response;
 import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceUserRankingResponse;
 import com.example.fitness_trAIner.service.user.dto.response.UserServiceDetailInfoResponse;
@@ -41,6 +42,17 @@ public class ScoreController {
         return GlobalResponse.<ScoreServiceUserRankingResponse>builder()
                 .message("유저 상세 조회")
                 .result(scoreService.findUserRanking(exerciseName, userId))
+                .build();
+    }
+
+    @GetMapping
+    @Operation(summary = "랭킹 카테고리", description = "점수조회가 가능한 운동, 총점의 종류")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true, content = @Content(schema = @Schema(implementation =  ScoreServiceTop10Response.class)))
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<ScoreServiceScoreListResponse> findScoreCategory() {
+        return GlobalResponse.<ScoreServiceScoreListResponse>builder()
+                .message("점수가 존재하는 랭킹 리스트 조회")
+                .result(scoreService.findScoreList())
                 .build();
     }
 

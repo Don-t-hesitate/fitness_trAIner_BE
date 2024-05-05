@@ -1,11 +1,14 @@
 package com.example.fitness_trAIner.service.score;
 
+import com.example.fitness_trAIner.common.exception.exceptions.ExerciseException;
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
 import com.example.fitness_trAIner.common.exception.exceptions.ScoreException;
+import com.example.fitness_trAIner.repository.exercise.ExerciseRepository;
 import com.example.fitness_trAIner.repository.user.User;
 import com.example.fitness_trAIner.repository.user.UserRepository;
 import com.example.fitness_trAIner.repository.user.UserScore;
 import com.example.fitness_trAIner.repository.user.UserScoreRepository;
+import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceScoreListResponse;
 import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceTop10Response;
 import com.example.fitness_trAIner.service.score.dto.response.ScoreServiceUserRankingResponse;
 import com.example.fitness_trAIner.vos.UserScoreVO;
@@ -24,8 +27,14 @@ import java.util.List;
 public class ScoreServiceImp implements ScoreService {
     private final UserScoreRepository userScoreRepository;
     private final UserRepository userRepository;
+    private final ExerciseRepository exerciseRepository;
     @Override
     public ScoreServiceTop10Response findTop10Ranking(String exerciseName) {
+
+        if (!userScoreRepository.existsByExerciseName(exerciseName)) {
+            throw new ScoreException("점수가 존재하지 않는 운동");
+        }
+
         List<UserScore> userScoreList = userScoreRepository.findTop10ByExerciseNameOrderByScoreDesc(exerciseName);
         List<UserScoreVO> userScoreVOList = new ArrayList<>();
 
@@ -43,6 +52,7 @@ public class ScoreServiceImp implements ScoreService {
 
 
         return ScoreServiceTop10Response.builder()
+                .exerciseName(exerciseName)
                 .userScoreVOList(userScoreVOList)
                 .build();
     }
@@ -64,4 +74,16 @@ public class ScoreServiceImp implements ScoreService {
                 .score(userScore.getScore())
                 .build();
     }
+
+    @Override
+    public ScoreServiceScoreListResponse findScoreList() {
+        List<String> scoreList = userScoreRepository.findDistinctExerciseName();
+
+
+        return ScoreServiceScoreListResponse.builder()
+                .scoreCategory(scoreList)
+                .build();
+    }
+
+
 }

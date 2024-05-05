@@ -89,12 +89,26 @@ public class WorkoutServiceImp implements WorkoutService {
 
     @Override
     public WorkoutServiceSaveNoteResponse saveNote(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NoteException("존재하지 않는 유저 아이디");
-        }
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoUserException("존재하지 않는 유저 아이디"));
 
         Note note = noteRepository.save(Note.builder().userId(userId).build());
 
+
+        UserScore userScore = (userScoreRepository.existsByUserIdAndExerciseName(note.getUserId(), "총점")
+                ? userScoreRepository.findByUserIdAndExerciseName(note.getUserId(), "총점").orElseThrow(()-> new ScoreException("점수 DB조회 오류"))
+                : userScoreRepository.save(UserScore.builder()
+                .userId(note.getUserId())
+                .exerciseName("총점")
+                .score(0)
+                .build()));
+        if(!user.getAttendanceCheck()) {
+            user.setAttendanceCheck(true);
+            userRepository.save(user);
+            userScore.setScore(userScore.getScore() + 50);
+            userScoreRepository.save(userScore);
+
+        }
 
         return WorkoutServiceSaveNoteResponse.builder()
                 .noteId(note.getNoteId())

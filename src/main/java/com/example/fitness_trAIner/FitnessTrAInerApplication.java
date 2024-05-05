@@ -9,8 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @EnableJpaAuditing
 @EnableScheduling
-//TODO 식단, 출석이 반영되는 점수 테이블 이름
-//TODO 2주마다 초기화되는거 시간 설정
 public class FitnessTrAInerApplication {
 
     public static void main(String[] args) {
