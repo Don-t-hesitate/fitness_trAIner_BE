@@ -78,7 +78,7 @@ public class ExerciseController {
 //    }
 
     @DeleteMapping("/{exerciseName}")
-    @Operation(summary = "운동 정보 삭제", description = "운동 정보 삭제 API")
+    @Operation(summary = "운동 정보 삭제", description = "운동 정보 삭제 API, 운동 정보 삭제를 하면 그운동의 영상도 자동으로 삭제")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<String> deleteExercise(@PathVariable String exerciseName) {
@@ -103,7 +103,7 @@ public class ExerciseController {
 
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "video/{exerciseName}")
-    @Operation(summary = "동영상 업로드", description = "운동 예시 영상 업로드 C:/video/exercise 이경로에 저장")
+    @Operation(summary = "동영상 업로드", description = "운동 예시 영상 업로드 테스트에선 C:/video/exercise 이경로에 저장")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<String> uploadExerciseVideo(@RequestPart MultipartFile file, @PathVariable String exerciseName) {
@@ -114,7 +114,7 @@ public class ExerciseController {
                 .build();
     }
     @DeleteMapping("/video/{exerciseName}")
-    @Operation(summary = "운동 영상 삭제", description = "운동 영상 삭제 API")
+    @Operation(summary = "운동 영상 삭제", description = "운동 영상 수정을할때는 영상삭제한번하고 영상 업로드 한번 해주세요")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<String> deleteExerciseVideo(@PathVariable String exerciseName) {
