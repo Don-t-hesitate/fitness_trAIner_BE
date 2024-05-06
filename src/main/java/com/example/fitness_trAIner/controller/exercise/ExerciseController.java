@@ -60,22 +60,22 @@ public class ExerciseController {
                 .result(exerciseService.findAllExercise())
                 .build();
     }
-    @PutMapping
-    @Operation(summary = "운동 정보 수정", description = "운동 정보 수정 API")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
-    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> updateExercise(@RequestBody ExerciseUpdateRequestBody requestBody) {
-
-        return GlobalResponse.<String>builder()
-                .message("운동 정보 수정")
-                .result(exerciseService.updateExercise(ExerciseServiceUpdateRequest.builder()
-                        .previousName(requestBody.getExerciseName())
-                        .exerciseName(requestBody.getNewExerciseName())
-                        .exerciseType(requestBody.getNewExerciseType())
-                        .perKcal(requestBody.getNewPerKcal())
-                        .build()))
-                .build();
-    }
+//    @PutMapping
+//    @Operation(summary = "운동 정보 수정", description = "운동 정보 수정 API")
+//    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+//    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+//    public final GlobalResponse<String> updateExercise(@RequestBody ExerciseUpdateRequestBody requestBody) {
+//
+//        return GlobalResponse.<String>builder()
+//                .message("운동 정보 수정")
+//                .result(exerciseService.updateExercise(ExerciseServiceUpdateRequest.builder()
+//                        .previousName(requestBody.getExerciseName())
+//                        .exerciseName(requestBody.getNewExerciseName())
+//                        .exerciseType(requestBody.getNewExerciseType())
+//                        .perKcal(requestBody.getNewPerKcal())
+//                        .build()))
+//                .build();
+//    }
 
     @DeleteMapping("/{exerciseName}")
     @Operation(summary = "운동 정보 삭제", description = "운동 정보 삭제 API")

@@ -71,8 +71,13 @@ public class ExerciseServiceImp implements ExerciseService{
     @Override
     public String updateExercise(ExerciseServiceUpdateRequest request) {
         Exercise exercise = exerciseRepository.findByExerciseName(request.getPreviousName()).orElseThrow(()->new ExerciseException("존재하지 않는 운동"));
+        ExerciseVideo exerciseVideo = new ExerciseVideo();
 
         try {
+            if (exerciseVideoRepository.existsByExerciseName(request.getPreviousName()))
+                exerciseVideo = exerciseVideoRepository.findByExerciseName(request.getPreviousName()).orElseThrow(()->new ExerciseException("운동 영상 못찾음"));
+                exerciseVideo.setExerciseName(request.getExerciseName());
+                exerciseVideoRepository.save(exerciseVideo);
             exercise.setExerciseName(request.getExerciseName());
             exercise.setPerKcal(request.getPerKcal());
             exercise.setExerciseType(request.getExerciseType());
@@ -90,9 +95,9 @@ public class ExerciseServiceImp implements ExerciseService{
         
 
         try {
-            exerciseRepository.delete(exercise);
             if (exerciseVideoRepository.existsByExerciseName(exerciseName))
                 deleteExerciseVideo(exerciseName);
+            exerciseRepository.delete(exercise);
         } catch (Exception e) {
             throw new ExerciseException("운동 정보 삭제 실패");
         }
