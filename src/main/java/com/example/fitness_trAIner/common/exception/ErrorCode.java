@@ -11,7 +11,9 @@ public enum ErrorCode {
     DIET_ERROR(305, "식단 업로드 오류"),
     FILESTORE_ERROR(306, "파일 저장 실패 오류"),
     SCORE_ERROR(307, "점수 오류"),
-    EXERCISE_ERROR(308, "운동 예시 오류");
+    EXERCISE_ERROR(308, "운동 예시 오류"),
+    PYTHON_ERROR(309, "파이썬 파일 오류")
+    ;
 
 
 
