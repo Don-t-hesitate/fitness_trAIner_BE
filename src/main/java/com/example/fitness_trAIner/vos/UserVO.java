@@ -12,4 +12,5 @@ public class UserVO {
     private Integer age;
     private Float weight;
     private Float height;
+    private String gender;
 }
