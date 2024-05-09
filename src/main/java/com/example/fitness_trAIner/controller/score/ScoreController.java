@@ -47,7 +47,7 @@ public class ScoreController {
 
     @GetMapping
     @Operation(summary = "랭킹 카테고리", description = "점수조회가 가능한 운동, 총점의 종류")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true, content = @Content(schema = @Schema(implementation =  ScoreServiceTop10Response.class)))
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true, content = @Content(schema = @Schema(implementation =  ScoreServiceScoreListResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<ScoreServiceScoreListResponse> findScoreCategory() {
         return GlobalResponse.<ScoreServiceScoreListResponse>builder()
