@@ -15,12 +15,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.List;
 
 @RequestMapping("/ai")
 @Tag(name = "AI", description = "ai관련 API")
@@ -49,5 +55,43 @@ public class AIController {
                 .message("AI데이터 전송")
                 .result(aiService.pythonProcess(json))
                 .build();
+    }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE + "; charset=UTF-8", path = "/pose")
+    @Operation(summary = "자세 데이터 전송", description = "학습용 데이터를 서버에 저장<br></br><strong>uploadFiles</strong>는 여러가지 파일을 한꺼번에 전송 가능<br></br><strong>uploadPath</strong>는 저장할 경로 지정(Bodyweight, Dumbbell&barbell, Machine 등)")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> savePoseData(List<MultipartFile> files, @RequestPart("uploadPath") String uploadPath) {
+
+        try {
+            String decodedUploadPath = URLDecoder.decode(uploadPath, "UTF-8");
+            return GlobalResponse.<String>builder()
+                    .message("자세 데이터 저장" + decodedUploadPath)
+                    .result(aiService.uploadFiles(files, decodedUploadPath))
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @GetMapping(path = "/pose/{exerciseType}")
+    @Operation(summary = "자세 데이터 조회", description = "학습용 데이터 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final ResponseEntity<byte[]> downloadPoseData(@PathVariable String exerciseType) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            aiService.filesView(exerciseType, baos);
+            byte[] zipBytes = baos.toByteArray();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "files.zip");
+            headers.setContentLength(zipBytes.length);
+
+            return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
