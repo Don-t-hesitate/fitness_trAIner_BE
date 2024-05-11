@@ -2,7 +2,6 @@ package com.example.fitness_trAIner.service.ai;
 
 import com.example.fitness_trAIner.common.exception.exceptions.AIException;
 import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -54,8 +52,8 @@ public class AIServiceImp implements AIService{
     }
 
     @Override
-    public String uploadFiles(List<MultipartFile> files, String uploadPath) throws IOException {
-        File uploadDir = new File(posePath + File.separator + uploadPath);
+    public String uploadFiles(List<MultipartFile> files, String parentPath, String uploadPath) throws IOException {
+        File uploadDir = new File(posePath + File.separator + parentPath + File.separator + uploadPath);
 
         if (!uploadDir.exists()) {
             uploadDir.mkdirs();
@@ -82,11 +80,11 @@ public class AIServiceImp implements AIService{
         }
 
         ZipOutputStream zipOutputStream = new ZipOutputStream(baos);
-        addFilesToZip(zipOutputStream, directory);
+        addFilesToZip(zipOutputStream, directory, directory.getName());
         zipOutputStream.close();
     }
 
-    private void addFilesToZip(ZipOutputStream zipOutputStream, File directory) throws IOException {
+    private void addFilesToZip(ZipOutputStream zipOutputStream, File directory, String parentDir) throws IOException {
         File[] files = directory.listFiles();
         if (files == null || files.length == 0) {
             return;
@@ -94,18 +92,19 @@ public class AIServiceImp implements AIService{
 
         for (File file : files) {
             if (file.isDirectory()) {
-                addFilesToZip(zipOutputStream, file);
+                addFilesToZip(zipOutputStream, file, parentDir + "/" + file.getName());
             } else {
-                addFileToZip(zipOutputStream, file, file.getName());
+                addFileToZip(zipOutputStream, file, parentDir);
             }
         }
     }
 
-    private void addFileToZip(ZipOutputStream zipOutputStream, File file, String entryName) throws IOException {
+    private void addFileToZip(ZipOutputStream zipOutputStream, File file, String parentDir) throws IOException {
         byte[] buffer = new byte[4096];
 
         FileInputStream fileInputStream = new FileInputStream(file);
-        ZipEntry zipEntry = new ZipEntry(entryName);
+        String entryPath = parentDir + "/" + file.getName(); // 디렉터리 구조 유지를 위해 전체 경로 사용
+        ZipEntry zipEntry = new ZipEntry(entryPath);
         zipOutputStream.putNextEntry(zipEntry);
 
         int bytesRead;
@@ -115,6 +114,36 @@ public class AIServiceImp implements AIService{
 
         fileInputStream.close();
         zipOutputStream.closeEntry();
+    }
+
+    @Override
+    public String deleteFiles(String parentPath, String deletePath) throws IOException {
+        File deleteDir = new File(posePath + File.separator + parentPath + File.separator + deletePath);
+
+        if (!deleteDir.exists()) {
+            throw new FileStoreException("삭제할 파일이 존재하지 않습니다.");
+        }
+
+        deleteDirectoryRecursively(deleteDir);
+
+        return "파일 삭제 성공";
+    }
+
+    private void deleteDirectoryRecursively(File dir) throws IOException {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectoryRecursively(file);
+                }
+                if (!file.delete()) {
+                    throw new FileStoreException("파일 삭제 실패: " + file.getName());
+                }
+            }
+        }
+        if (!dir.delete()) {
+            throw new FileStoreException("디렉토리 삭제 실패: " + dir.getName());
+        }
     }
 
 }

@@ -61,13 +61,13 @@ public class AIController {
     @Operation(summary = "자세 데이터 전송", description = "학습용 데이터를 서버에 저장<br></br><strong>uploadFiles</strong>는 여러가지 파일을 한꺼번에 전송 가능<br></br><strong>uploadPath</strong>는 저장할 경로 지정(Bodyweight, Dumbbell&barbell, Machine 등)")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> savePoseData(List<MultipartFile> files, @RequestPart("uploadPath") String uploadPath) {
+    public final GlobalResponse<String> savePoseData(List<MultipartFile> files,@RequestPart("parentPath") String parentPath ,@RequestPart("uploadPath") String uploadPath) {
 
         try {
             String decodedUploadPath = URLDecoder.decode(uploadPath, "UTF-8");
             return GlobalResponse.<String>builder()
                     .message("자세 데이터 저장" + decodedUploadPath)
-                    .result(aiService.uploadFiles(files, decodedUploadPath))
+                    .result(aiService.uploadFiles(files, parentPath, decodedUploadPath))
                     .build();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -80,6 +80,9 @@ public class AIController {
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final ResponseEntity<byte[]> downloadPoseData(@PathVariable String exerciseType) {
         try {
+            if (exerciseType.contains("-")) {
+                exerciseType = exerciseType.replace("-", "&");
+            }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             aiService.filesView(exerciseType, baos);
             byte[] zipBytes = baos.toByteArray();
@@ -90,6 +93,24 @@ public class AIController {
             headers.setContentLength(zipBytes.length);
 
             return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping(path = "/pose/{exerciseType}/{exerciseName}")
+    @Operation(summary = "자세 데이터 삭제", description = "학습용 데이터 삭제")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> deletePoseData(@PathVariable String exerciseType, @PathVariable String exerciseName) {
+        try {
+            if (exerciseType.contains("-")) {
+                exerciseType = exerciseType.replace("-", "&");
+            }
+            return GlobalResponse.<String>builder()
+                    .message("자세 데이터 삭제")
+                    .result(aiService.deleteFiles(exerciseType, exerciseName))
+                    .build();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
