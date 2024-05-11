@@ -1,4 +1,4 @@
-package com.example.fitness_trAIner.service.ai.dto;
+package com.example.fitness_trAIner.service.ai.dto.request;
 
 import com.example.fitness_trAIner.vos.PosVO;
 import lombok.AccessLevel;

@@ -1,6 +1,7 @@
 package com.example.fitness_trAIner.service.ai;
 
 import com.example.fitness_trAIner.common.exception.exceptions.AIException;
+import com.example.fitness_trAIner.service.ai.dto.response.AIServiceResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ import java.io.InputStreamReader;
 public class AIServiceImp implements AIService{
 
     @Override
-    public String pythonProcess(String data) throws IOException {
+    public AIServiceResponse pythonProcess(String data) throws IOException {
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("python", "C:/ai/test.py", data);
         Process process  = processBuilder.start();
@@ -40,7 +41,11 @@ public class AIServiceImp implements AIService{
             e.printStackTrace();
         }
 
-        return result.toString();
+        return AIServiceResponse.builder()
+                .perfect(0)
+                .good(0)
+                .bad(0)
+                .build();
 
     }
 
