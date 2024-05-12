@@ -53,6 +53,7 @@ public class UserServiceImp implements UserService {
                     .activityLevel(request.getActivityLevel())
                     .preferenceTypeFood(request.getPreferenceTypeFood())
                     .role("NORMAL")
+                    .attendanceCheck(false)
                     .build());
         } catch (Exception e) {
             throw new SignupFailException("db저장 실패");
