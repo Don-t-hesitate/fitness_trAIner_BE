@@ -1,5 +1,6 @@
 package com.example.fitness_trAIner.controller.ai;
 
+import com.example.fitness_trAIner.common.exception.exceptions.EmptyDirectoryException;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.controller.ai.dto.request.AIRequestBody;
@@ -57,16 +58,17 @@ public class AIController {
                 .build();
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE + "; charset=UTF-8", path = "/pose")
-    @Operation(summary = "자세 데이터 전송", description = "학습용 데이터를 서버에 저장<br></br><strong>uploadFiles</strong>는 여러가지 파일을 한꺼번에 전송 가능<br></br><strong>uploadPath</strong>는 저장할 경로 지정(Bodyweight, Dumbbell&barbell, Machine 등)")
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE + "; charset=UTF-8", path = "/pose")
+    @PostMapping(path = "/pose", headers = ("content-type=multipart/form-data;charset=UTF-8"))
+    @Operation(summary = "자세 데이터 전송", description = "학습용 데이터를 서버에 저장<br></br><strong>files</strong>는 여러가지 파일을 한꺼번에 전송 가능<br></br><strong>parentPath</strong>는 상위 경로 지정(Bodyweight, Dumbbell&barbell, Machine 등)<br></br><strong>uploadPath</strong>는 저장될 하위 경로 지정(운동이름)")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> savePoseData(List<MultipartFile> files,@RequestPart("parentPath") String parentPath ,@RequestPart("uploadPath") String uploadPath) {
+    public final GlobalResponse<String> savePoseData(List<MultipartFile> files, @RequestPart("parentPath") String parentPath, @RequestPart("uploadPath") String uploadPath) {
 
         try {
             String decodedUploadPath = URLDecoder.decode(uploadPath, "UTF-8");
             return GlobalResponse.<String>builder()
-                    .message("자세 데이터 저장" + decodedUploadPath)
+                    .message("자세 데이터 저장: " + decodedUploadPath)
                     .result(aiService.uploadFiles(files, parentPath, decodedUploadPath))
                     .build();
         } catch (IOException e) {
@@ -75,16 +77,31 @@ public class AIController {
     }
 
     @GetMapping(path = "/pose/{exerciseType}")
-    @Operation(summary = "자세 데이터 조회", description = "학습용 데이터 조회")
+    @Operation(summary = "자세 데이터 명단 조회", description = "학습용 데이터 명단 조회")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final ResponseEntity<byte[]> downloadPoseData(@PathVariable String exerciseType) {
+    public final GlobalResponse<List<String>> viewPoseName(@PathVariable String exerciseType) {
+        if (exerciseType.contains("-")) {
+            exerciseType = exerciseType.replace("-", "&");
+        }
+        return GlobalResponse.<List<String>>builder()
+                .message("자세 데이터 명단 조회")
+                .result(aiService.filesNameView(exerciseType))
+                .build();
+    }
+
+
+    @GetMapping(path = "/pose/{exerciseType}/{exerciseName}")
+    @Operation(summary = "자세 데이터 상세 조회", description = "학습용 데이터 상세 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final ResponseEntity<byte[]> downloadPoseData(@PathVariable String exerciseType, @PathVariable String exerciseName) {
         try {
             if (exerciseType.contains("-")) {
                 exerciseType = exerciseType.replace("-", "&");
             }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            aiService.filesView(exerciseType, baos);
+            aiService.filesView(exerciseType, exerciseName, baos);
             byte[] zipBytes = baos.toByteArray();
 
             HttpHeaders headers = new HttpHeaders();

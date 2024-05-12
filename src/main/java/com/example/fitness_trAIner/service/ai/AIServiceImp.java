@@ -1,7 +1,9 @@
 package com.example.fitness_trAIner.service.ai;
 
 import com.example.fitness_trAIner.common.exception.exceptions.AIException;
+import com.example.fitness_trAIner.common.exception.exceptions.EmptyDirectoryException;
 import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -73,8 +78,26 @@ public class AIServiceImp implements AIService{
     }
 
     @Override
-    public void filesView(String exerciseType, ByteArrayOutputStream baos) throws IOException {
-        File directory = new File(posePath + File.separator + exerciseType);
+    public List<String> filesNameView(String parentPath) {
+        File directory = new File(posePath + File.separator + parentPath);
+        System.out.println(directory.getAbsolutePath());
+        if (!directory.exists()) {
+            throw new EmptyDirectoryException("디렉토리가 존재하지 않습니다.");
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null || files.length == 0) {
+            throw new EmptyDirectoryException("디렉터리에 파일이 없습니다.");
+        }
+
+        return Arrays.stream(files)
+                .map(File::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void filesView(String parentPath, String filePath, ByteArrayOutputStream baos) throws IOException {
+        File directory = new File(posePath + File.separator + parentPath + File.separator + filePath);
         if (!directory.exists()) {
             throw new FileStoreException("디렉토리가 존재하지 않습니다.");
         }
