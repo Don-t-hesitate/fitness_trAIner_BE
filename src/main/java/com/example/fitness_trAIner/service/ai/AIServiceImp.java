@@ -3,16 +3,18 @@ package com.example.fitness_trAIner.service.ai;
 import com.example.fitness_trAIner.common.exception.exceptions.AIException;
 import com.example.fitness_trAIner.common.exception.exceptions.EmptyDirectoryException;
 import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.zeroturnaround.exec.ProcessExecutor;
+import org.zeroturnaround.exec.ProcessResult;
+import org.zeroturnaround.exec.stream.LogOutputStream;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -26,6 +28,8 @@ public class AIServiceImp implements AIService{
 
     @Value("${posepath}")
     private String posePath;
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public String pythonProcess(String data) throws IOException {
@@ -169,4 +173,22 @@ public class AIServiceImp implements AIService{
         }
     }
 
+    @Override
+    public void startTraining(String pythonFilePath, String params) throws Exception {
+        System.out.println("pythonFilePath: " + pythonFilePath);
+        System.out.println("params: " + params);
+        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath, params)
+                .redirectOutput(new LogOutputStream() {
+                    @Override
+                    protected void processLine(String line) {
+                        messagingTemplate.convertAndSend("/topic/progress", line);
+                    }
+                }).execute();
+
+        if (exitCode.getExitValue() == 0) {
+            messagingTemplate.convertAndSend("/topic/progress", "END");
+        } else {
+            messagingTemplate.convertAndSend("/topic/progress", "ERROR");
+        }
+    }
 }

@@ -1,13 +1,9 @@
 package com.example.fitness_trAIner.controller.ai;
 
-import com.example.fitness_trAIner.common.exception.exceptions.EmptyDirectoryException;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.controller.ai.dto.request.AIRequestBody;
-import com.example.fitness_trAIner.controller.exercise.dto.request.ExerciseSaveRequestBody;
 import com.example.fitness_trAIner.service.ai.AIService;
-import com.example.fitness_trAIner.service.exercise.dto.request.ExerciseServiceSaveRequest;
-import com.example.fitness_trAIner.service.exercise.dto.response.ExerciseServiceSaveResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,13 +16,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 
 @RequestMapping("/ai")
@@ -131,5 +127,14 @@ public class AIController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @MessageMapping("/start")
+    public void start(String requestData) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String pythonFilePath = objectMapper.readTree(requestData).get("pythonFilePath").asText();
+        String params = objectMapper.readTree(requestData).get("params").toString();
+
+        aiService.startTraining(pythonFilePath, params);
     }
 }

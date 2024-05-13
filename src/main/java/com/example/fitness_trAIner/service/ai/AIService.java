@@ -1,6 +1,5 @@
 package com.example.fitness_trAIner.service.ai;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -13,4 +12,6 @@ public interface AIService {
     public List<String> filesNameView(String parentPath);
     public void filesView(String parentPath, String filePath, ByteArrayOutputStream baos) throws IOException;
     public String deleteFiles(String parentPath, String deletePath) throws IOException;
+    public void startTraining(String pythonFilePath, String params) throws Exception;
+
 }
