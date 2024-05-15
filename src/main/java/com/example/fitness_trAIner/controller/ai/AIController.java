@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/ai")
 @Tag(name = "AI", description = "ai관련 API")
@@ -76,13 +77,13 @@ public class AIController {
     @Operation(summary = "자세 데이터 명단 조회", description = "학습용 데이터 명단 조회")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<List<String>> viewPoseName(@PathVariable String exerciseType) {
+    public final GlobalResponse<List<String>> getPoseName(@PathVariable String exerciseType) {
         if (exerciseType.contains("-")) {
             exerciseType = exerciseType.replace("-", "&");
         }
         return GlobalResponse.<List<String>>builder()
                 .message("자세 데이터 명단 조회")
-                .result(aiService.filesNameView(exerciseType))
+                .result(aiService.getFilesName(exerciseType))
                 .build();
     }
 
@@ -130,11 +131,79 @@ public class AIController {
     }
 
     @MessageMapping("/start")
-    public void start(String requestData) throws Exception {
+    public void start(String requestData) throws Exception { // AI 학습 시작, WebSocket 통신
         ObjectMapper objectMapper = new ObjectMapper();
         String pythonFilePath = objectMapper.readTree(requestData).get("pythonFilePath").asText();
         String params = objectMapper.readTree(requestData).get("params").toString();
+        String exerciseName = objectMapper.readTree(requestData).get("exerciseName").asText();
 
-        aiService.startTraining(pythonFilePath, params);
+        aiService.startTraining(pythonFilePath, exerciseName, params);
+    }
+
+    @GetMapping(path = "/exercise/list")
+    @Operation(summary = "운동 AI 목록 조회", description = "운동 AI 목록 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<List<String>> viewExerciseList() {
+        return GlobalResponse.<List<String>>builder()
+                .message("운동 AI 목록 조회")
+                .result(aiService.getModelList())
+                .build();
+    }
+
+    @GetMapping(path = "/exercise/{exerciseName}")
+    @Operation(summary = "운동 AI 정보 조회", description = "운동 AI 정보 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<Map<String, List<String>>> viewExerciseInfo(@PathVariable String exerciseName) {
+        return GlobalResponse.<Map<String, List<String>>>builder()
+                .message("운동 AI 정보 조회")
+                .result(aiService.getModelInfo(exerciseName))
+                .build();
+    }
+
+    @GetMapping(path = "/exercise/{exerciseName}/{modelVersion}")
+    @Operation(summary = "운동 AI 상세 정보 조회", description = "운동 AI 상세 정보 조회")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<Map<String, Object>> viewExerciseDetail(@PathVariable String exerciseName, @PathVariable String modelVersion) {
+        return GlobalResponse.<Map<String, Object>>builder()
+                .message("운동 AI 상세 정보 조회")
+                .result(aiService.getModelDetail(exerciseName, modelVersion))
+                .build();
+    }
+
+    @PostMapping(path = "/exercise/apply/{exerciseName}/{modelVersion}")
+    @Operation(summary = "운동 AI 적용", description = "운동 AI 적용")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> applyExercise(@PathVariable String exerciseName, @PathVariable String modelVersion) {
+        try {
+            return GlobalResponse.<String>builder()
+                    .message("운동 AI 적용")
+                    .result(aiService.applyModel(exerciseName, modelVersion, ""))
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @DeleteMapping(path = "/exercise/{exerciseType}/{exerciseName}")
+    @Operation(summary = "운동 AI 삭제", description = "운동 AI 삭제")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> deleteExercise(@PathVariable String exerciseType, @PathVariable String exerciseName) {
+        try {
+            if (exerciseType.contains("-")) {
+                exerciseType = exerciseType.replace("-", "&");
+            }
+            System.out.println("exerciseName: " + exerciseName);
+            return GlobalResponse.<String>builder()
+                    .message("운동 AI 삭제")
+                    .result(aiService.deleteFiles(exerciseType, exerciseName))
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
