@@ -93,6 +93,20 @@ public class ExceptionController {
         log.error("예시 운동 관련 오류", e);
         return makeResponse(e.getMessage(), ErrorCode.EXERCISE_ERROR.getCode());
     }
+    @ExceptionHandler({AIException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse aiException(final AIException e) {
+        log.error("AI관련", e);
+        return makeResponse(e.getMessage(), ErrorCode.AI_ERROR.getCode());
+    }
+
+    @ExceptionHandler({EmptyDirectoryException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse emptyDirectoryException(final EmptyDirectoryException e) {
+        log.error("파일 조회 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.DIRECTORY_ERROR.getCode());
+    }
+
 
 
 
