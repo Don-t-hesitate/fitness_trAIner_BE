@@ -13,7 +13,8 @@ public interface AIService {
     public List<String> getFilesName(String parentPath);
     public void filesView(String parentPath, String filePath, ByteArrayOutputStream baos) throws IOException;
     public String deleteFiles(String parentPath, String deletePath) throws IOException;
-    public void startTraining(String pythonFilePath, String exerciseName, String params) throws Exception;
+//    public void startTraining(String pythonFilePath, String exerciseName, String params) throws Exception;
+    public void startTraining(String pythonFilePath, String exerciseName) throws Exception;
     public List<String> getModelList();
     public Map<String, List<String>> getModelInfo(String exerciseName);
     public Map<String, Object> getModelDetail(String exerciseName, String modelVersion);

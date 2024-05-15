@@ -119,6 +119,7 @@ public class AIServiceImp implements AIService{
         if (!directory.exists()) {
             throw new FileStoreException("디렉토리가 존재하지 않습니다.");
         }
+        System.out.println("filesView: " + directory.getName());
 
         ZipOutputStream zipOutputStream = new ZipOutputStream(baos);
         addFilesToZip(zipOutputStream, directory, directory.getName());
@@ -126,17 +127,22 @@ public class AIServiceImp implements AIService{
     }
 
     private void addFilesToZip(ZipOutputStream zipOutputStream, File directory, String parentDir) throws IOException {
-        File[] files = directory.listFiles();
-        if (files == null || files.length == 0) {
-            return;
-        }
-
-        for (File file : files) {
-            if (file.isDirectory()) {
-                addFilesToZip(zipOutputStream, file, parentDir + "/" + file.getName());
-            } else {
-                addFileToZip(zipOutputStream, file, parentDir);
+        if(directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            System.out.println("files: " + Arrays.toString(files));
+            if (files == null || files.length == 0) {
+                return;
             }
+
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    addFilesToZip(zipOutputStream, file, parentDir + "/" + file.getName());
+                } else {
+                    addFileToZip(zipOutputStream, file, parentDir);
+                }
+            }
+        } else {
+            addFileToZip(zipOutputStream, directory, directory.getParent());
         }
     }
 
@@ -144,7 +150,7 @@ public class AIServiceImp implements AIService{
         byte[] buffer = new byte[4096];
 
         FileInputStream fileInputStream = new FileInputStream(file);
-        String entryPath = parentDir + "/" + file.getName(); // 디렉터리 구조 유지를 위해 전체 경로 사용
+        String entryPath = parentDir + File.separator + file.getName(); // 디렉터리 구조 유지를 위해 전체 경로 사용
         ZipEntry zipEntry = new ZipEntry(entryPath);
         zipOutputStream.putNextEntry(zipEntry);
 
@@ -202,21 +208,23 @@ public class AIServiceImp implements AIService{
     }
 
     @Override
-    public void startTraining(String pythonFilePath, String exerciseName, String params) throws Exception {
+//    public void startTraining(String pythonFilePath, String exerciseName, String params) throws Exception {
+    public void startTraining(String pythonFilePath, String exerciseName) throws Exception {
         System.out.println("pythonFilePath: " + pythonFilePath);
-        System.out.println("params: " + params);
+//        System.out.println("params: " + params);
         System.out.println("exerciseName: " + exerciseName);
-        // params에 있는 파일명에 exerciseAiPath를 추가
-        String[] words = params.split(" ");
-        for (int i = 0; i < words.length; i++) {
-            if (words[i].contains(".json")) {
-                words[i] = exerciseAiPath + "/" + exerciseName + "/" + words[i];
-                break;
-            }
-        }
-        params = String.join(" ", words);
+//        // params에 있는 파일명에 exerciseAiPath를 추가
+//        String[] words = params.split(" ");
+//        for (int i = 0; i < words.length; i++) {
+//            if (words[i].contains(".json")) {
+//                words[i] = exerciseAiPath + "/" + exerciseName + "/" + words[i];
+//                break;
+//            }
+//        }
+//        params = String.join(" ", words);
 
-        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath, params)
+//        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath, params)
+        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath)
                 .redirectOutput(new LogOutputStream() {
                     @Override
                     protected void processLine(String line) {
