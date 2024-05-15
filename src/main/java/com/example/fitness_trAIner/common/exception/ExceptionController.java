@@ -100,6 +100,13 @@ public class ExceptionController {
         return makeResponse(e.getMessage(), ErrorCode.AI_ERROR.getCode());
     }
 
+    @ExceptionHandler({EmptyDirectoryException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public final GlobalExceptionResponse emptyDirectoryException(final EmptyDirectoryException e) {
+        log.error("파일 조회 관련 오류", e);
+        return makeResponse(e.getMessage(), ErrorCode.DIRECTORY_ERROR.getCode());
+    }
+
 
 
 

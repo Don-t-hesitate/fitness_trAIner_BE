@@ -8,13 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-public class AdminUserUpdateRequestBody {
+public class AdminUserPrefUpdateRequestBody {
     private Long userId;
-    private String nickname;
-    private Float height;
-    private Float weight;
-    private Integer age;
-    private String gender;
     private Integer spicyPreference;
     private Boolean meatConsumption;
     private String tastePreference;
