@@ -32,14 +32,16 @@ public class AIServiceImp implements AIService{
 
     @Value("${posepath}")
     private String posePath;
-
     @Value("${ai.workout}")
     private String workoutPath;
     @Override
     public AIServiceResponse pythonProcess(String data) throws IOException {
-        System.out.println(data);
+        String replaceData = data.replace("\"", "\\\"");
+
+
+
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("python", workoutPath, data.replace("\"", "\\\""));
+        processBuilder.command("python", workoutPath, replaceData);
         Process process  = processBuilder.start();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -49,7 +51,6 @@ public class AIServiceImp implements AIService{
         while ((line = reader.readLine()) != null) {
             result.append(line);
         }
-        System.out.println(result);
 
         try {
             int exitCode = process.waitFor();

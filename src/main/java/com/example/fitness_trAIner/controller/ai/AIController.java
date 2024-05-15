@@ -9,6 +9,7 @@ import com.example.fitness_trAIner.service.ai.AIService;
 import com.example.fitness_trAIner.service.ai.dto.response.AIServiceResponse;
 import com.example.fitness_trAIner.service.exercise.dto.request.ExerciseServiceSaveRequest;
 import com.example.fitness_trAIner.service.exercise.dto.response.ExerciseServiceSaveResponse;
+import com.example.fitness_trAIner.vos.AI.PositionVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,11 +44,19 @@ public class AIController {
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = AIServiceResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<AIServiceResponse> sendAIData(@RequestBody AIRequestBody data) throws IOException {
+        String exerciseName = new String();
+        if(!data.getPositionList().isEmpty()) {
+            PositionVO firstData = data.getPositionList().get(0);
+            exerciseName = firstData.getWorkoutName();
+        }
+//        System.out.println("운동이름" + exerciseName);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = new String();
         try {
             json = objectMapper.writeValueAsString(data);
+
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
