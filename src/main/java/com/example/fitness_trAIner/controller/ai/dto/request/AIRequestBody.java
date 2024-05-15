@@ -1,34 +1,16 @@
 package com.example.fitness_trAIner.controller.ai.dto.request;
 
-import com.example.fitness_trAIner.vos.PosVO;
+import com.example.fitness_trAIner.vos.AI.PositionVO;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class AIRequestBody {
-    private PosVO leftAnkle;
-    private PosVO leftElbow;
-    private PosVO leftFootIndex;
-    private PosVO leftHeel;
-    private PosVO leftHip;
-    private PosVO leftIndex;
-    private PosVO leftKnee;
-    private PosVO leftPinky;
-    private PosVO leftShoulder;
-    private PosVO leftThumb;
-    private PosVO leftWrist;
-    private PosVO rightAnkle;
-    private PosVO rightElbow;
-    private PosVO rightFootIndex;
-    private PosVO rightHeel;
-    private PosVO rightHip;
-    private PosVO rightIndex;
-    private PosVO rightKnee;
-    private PosVO rightPinky;
-    private PosVO rightShoulder;
-    private PosVO rightThumb;
-    private PosVO rightWrist;
-    private String workoutName;
+    List<PositionVO> positionList;
 }

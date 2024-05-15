@@ -6,6 +6,7 @@ import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.controller.ai.dto.request.AIRequestBody;
 import com.example.fitness_trAIner.controller.exercise.dto.request.ExerciseSaveRequestBody;
 import com.example.fitness_trAIner.service.ai.AIService;
+import com.example.fitness_trAIner.service.ai.dto.response.AIServiceResponse;
 import com.example.fitness_trAIner.service.exercise.dto.request.ExerciseServiceSaveRequest;
 import com.example.fitness_trAIner.service.exercise.dto.response.ExerciseServiceSaveResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,20 +40,19 @@ public class AIController {
 
     @PostMapping
     @Operation(summary = "AI데이터 전송", description = "사람의 각 부위의 포지션 전달")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = AIServiceResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> sendAIData(@RequestBody AIRequestBody data) throws IOException {
+    public final GlobalResponse<AIServiceResponse> sendAIData(@RequestBody AIRequestBody data) throws IOException {
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = new String();
         try {
             json = objectMapper.writeValueAsString(data);
-            System.out.println(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
-        return GlobalResponse.<String>builder()
+        return GlobalResponse.<AIServiceResponse>builder()
                 .message("AI데이터 전송")
                 .result(aiService.pythonProcess(json))
                 .build();
