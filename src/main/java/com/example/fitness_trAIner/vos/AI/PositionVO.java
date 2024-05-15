@@ -1,13 +1,13 @@
-package com.example.fitness_trAIner.service.ai.dto.request;
+package com.example.fitness_trAIner.vos.AI;
 
-import com.example.fitness_trAIner.vos.AI.xAndyVO;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class AIServiceRequest {
+@Setter
+@RequiredArgsConstructor
+public class PositionVO {
     private xAndyVO leftAnkle;
     private xAndyVO leftElbow;
     private xAndyVO leftFootIndex;
