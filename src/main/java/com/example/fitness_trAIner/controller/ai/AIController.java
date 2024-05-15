@@ -41,7 +41,6 @@ public class AIController {
         String json = new String();
         try {
             json = objectMapper.writeValueAsString(data);
-            System.out.println(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

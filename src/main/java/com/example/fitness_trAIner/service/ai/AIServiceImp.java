@@ -22,8 +22,9 @@ public class AIServiceImp implements AIService{
 
     @Override
     public AIServiceResponse pythonProcess(String data) throws IOException {
+        System.out.println(data);
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("python", "C:/ai/feedback_test.py", data);
+        processBuilder.command("python", "C:/ai/test.py", data.replace("\"", "\\\""));
         Process process  = processBuilder.start();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
