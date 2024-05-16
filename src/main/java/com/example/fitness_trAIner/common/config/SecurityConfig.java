@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .cors(c -> {
                     CorsConfigurationSource source = request -> {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(List.of("http://localhost:3000")); // WebSocket 통신 시 한정적으로 Origin을 허용하므로 상세 URL 지정 필요
+                        config.setAllowedOriginPatterns(List.of("*")); // WebSocket 통신 시 한정적으로 Origin을 허용하므로 상세 URL 지정 필요
 //                        config.setAllowedOrigins(List.of("http://localhost:60008")); // WebSocket 통신 시 한정적으로 Origin을 허용하므로 상세 URL 지정 필요
                         config.setAllowedMethods(List.of("*"));
                         config.setAllowCredentials(true);
@@ -66,7 +66,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("*");
 //        configuration.addAllowedOrigin("http://localhost:60008");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
