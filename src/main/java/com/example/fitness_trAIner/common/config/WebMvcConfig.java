@@ -2,10 +2,10 @@ package com.example.fitness_trAIner.common.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.example.fitness_trAIner.common.config.CustomResourceHttpMessageConverter;
 
 import java.util.List;
 
@@ -37,5 +37,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(new CustomResourceHttpMessageConverter());
+    }
+
+    // Cors 설정
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+//                .allowedOriginPatterns("http://localhost:3000") // 허용할 Origin 설정
+                .allowedOriginPatterns("http://localhost:60008") // 허용할 Origin 설정
+                .allowedMethods("GET", "POST", "PUT", "DELETE") // 허용할 HTTP Method 설정
+                .allowedHeaders("*") // 허용할 HTTP Header 설정
+                .allowCredentials(true); // 응답 헤더에 Credentials 허용 설정
     }
 }

@@ -44,8 +44,10 @@ public class SecurityConfig {
                 .cors(c -> {
                     CorsConfigurationSource source = request -> {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(List.of("*"));
+                        config.setAllowedOriginPatterns(List.of("*")); // WebSocket 통신 시 한정적으로 Origin을 허용하므로 상세 URL 지정 필요
+//                        config.setAllowedOrigins(List.of("http://localhost:60008")); // WebSocket 통신 시 한정적으로 Origin을 허용하므로 상세 URL 지정 필요
                         config.setAllowedMethods(List.of("*"));
+                        config.setAllowCredentials(true);
                         return config;
                     };
                     c.configurationSource(source);
@@ -65,6 +67,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOrigin("*");
+//        configuration.addAllowedOrigin("http://localhost:60008");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(true);
