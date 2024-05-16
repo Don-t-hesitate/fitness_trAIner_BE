@@ -4,6 +4,10 @@ import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
 import com.example.fitness_trAIner.controller.ai.dto.request.AIRequestBody;
 import com.example.fitness_trAIner.service.ai.AIService;
+import com.example.fitness_trAIner.service.ai.dto.response.AIServiceResponse;
+import com.example.fitness_trAIner.service.exercise.dto.request.ExerciseServiceSaveRequest;
+import com.example.fitness_trAIner.service.exercise.dto.response.ExerciseServiceSaveResponse;
+import com.example.fitness_trAIner.vos.AI.PositionVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,20 +41,27 @@ public class AIController {
 
     @PostMapping
     @Operation(summary = "AI데이터 전송", description = "사람의 각 부위의 포지션 전달")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = AIServiceResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> sendAIData(@RequestBody AIRequestBody data) throws IOException {
+    public final GlobalResponse<AIServiceResponse> sendAIData(@RequestBody AIRequestBody data) throws IOException {
+        String exerciseName = new String();
+        if(!data.getPositionList().isEmpty()) {
+            PositionVO firstData = data.getPositionList().get(0);
+            exerciseName = firstData.getWorkoutName();
+        }
+//        System.out.println("운동이름" + exerciseName);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = new String();
         try {
             json = objectMapper.writeValueAsString(data);
-            System.out.println(json);
+
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
-        return GlobalResponse.<String>builder()
+        return GlobalResponse.<AIServiceResponse>builder()
                 .message("AI데이터 전송")
                 .result(aiService.pythonProcess(json))
                 .build();

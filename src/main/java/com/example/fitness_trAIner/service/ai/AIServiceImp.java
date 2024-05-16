@@ -1,6 +1,10 @@
 package com.example.fitness_trAIner.service.ai;
 
 import com.example.fitness_trAIner.common.exception.exceptions.AIException;
+
+import com.example.fitness_trAIner.service.ai.dto.response.AIServiceResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.fitness_trAIner.common.exception.exceptions.EmptyDirectoryException;
 import com.example.fitness_trAIner.common.exception.exceptions.FileStoreException;
 import com.google.gson.JsonElement;
@@ -22,6 +26,7 @@ import org.zeroturnaround.exec.ProcessResult;
 import org.zeroturnaround.exec.stream.LogOutputStream;
 import com.google.gson.Gson;
 
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -32,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Service
@@ -45,10 +51,18 @@ public class AIServiceImp implements AIService{
 
     private final SimpMessagingTemplate messagingTemplate;
 
+    @Value("${ai.workout}")
+    private String workoutPath;
+  
+  
     @Override
-    public String pythonProcess(String data) throws IOException {
+    public AIServiceResponse pythonProcess(String data) throws IOException {
+        String replaceData = data.replace("\"", "\\\"");
+
+
+
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("python", "C:/ai/test.py", data);
+        processBuilder.command("python", workoutPath, replaceData);
         Process process  = processBuilder.start();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -58,7 +72,6 @@ public class AIServiceImp implements AIService{
         while ((line = reader.readLine()) != null) {
             result.append(line);
         }
-        System.out.println(result);
 
         try {
             int exitCode = process.waitFor();
@@ -70,7 +83,30 @@ public class AIServiceImp implements AIService{
             e.printStackTrace();
         }
 
-        return result.toString();
+
+        String jsonResult = result.toString().replace("'", "\"");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(jsonResult);
+
+        int perfect = jsonNode.get("perfect").asInt();
+        int good = jsonNode.get("good").asInt();
+        int bad = jsonNode.get("bad").asInt();
+
+        List<String> feedbackList = new ArrayList<>();
+        JsonNode feedbackNode = jsonNode.get("feedback");
+        if (feedbackNode != null && feedbackNode.isArray()) {
+            for (JsonNode node : feedbackNode) {
+                feedbackList.add(node.asText());
+            }
+        }
+
+        return AIServiceResponse.builder()
+                .perfect(perfect)
+                .good(good)
+                .bad(bad)
+                .feedback(feedbackList)
+                .build();
 
     }
 

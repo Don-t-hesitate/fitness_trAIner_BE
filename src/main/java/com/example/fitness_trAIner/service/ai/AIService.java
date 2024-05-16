@@ -1,14 +1,20 @@
 package com.example.fitness_trAIner.service.ai;
 
+
+
+import jakarta.servlet.http.HttpServletResponse;
+import com.example.fitness_trAIner.service.ai.dto.response.AIServiceResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 public interface AIService {
-    public String pythonProcess(String data) throws IOException;
+
+    public AIServiceResponse pythonProcess(String data) throws IOException;
     public String uploadFiles(List<MultipartFile> files, String parentPath, String uploadPath) throws IOException;
     public List<String> getFilesName(String parentPath);
     public void filesView(String parentPath, String filePath, ByteArrayOutputStream baos) throws IOException;
@@ -21,4 +27,5 @@ public interface AIService {
     // ai 모델 적용
     public String applyModel(String exerciseName, String modelVersion, String params) throws Exception;
     public String deleteModel(String exerciseName, String modelVersion) ;
+
 }
