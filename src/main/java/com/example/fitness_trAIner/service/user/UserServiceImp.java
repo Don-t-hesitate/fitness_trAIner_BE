@@ -54,6 +54,7 @@ public class UserServiceImp implements UserService {
                     .preferenceTypeFood(request.getPreferenceTypeFood())
                     .role("NORMAL")
                     .attendanceCheck(false)
+                    .preferenceFoods(request.getPreferenceFoods())
                     .build());
         } catch (Exception e) {
             throw new SignupFailException("db저장 실패");
@@ -93,6 +94,7 @@ public class UserServiceImp implements UserService {
                 .tastePreference(user.getTastePreference())
                 .activityLevel(user.getActivityLevel())
                 .preferenceTypeFood(user.getPreferenceTypeFood())
+                .preferenceFoods(user.getPreferenceFoods())
                 .build();
     }
 
@@ -116,6 +118,7 @@ public class UserServiceImp implements UserService {
         user.setTastePreference(request.getTastePreference());
         user.setActivityLevel(request.getActivityLevel());
         user.setPreferenceTypeFood(request.getPreferenceTypeFood());
+        user.setPreferenceFoods(request.getPreferenceFoods());
 
         userRepository.save(user);
 

@@ -44,6 +44,7 @@ public class UserController {
                         .tastePreference(requestBody.getTastePreference())
                         .activityLevel(requestBody.getActivityLevel())
                         .preferenceTypeFood(requestBody.getPreferenceTypeFood())
+                        .preferenceFoods(requestBody.getPreferenceFoods())
                         .build()))
                 .build();
     }
@@ -93,6 +94,7 @@ public class UserController {
                         .tastePreference(requestBody.getTastePreference())
                         .activityLevel(requestBody.getActivityLevel())
                         .preferenceTypeFood(requestBody.getPreferenceTypeFood())
+                        .preferenceFoods(requestBody.getPreferenceFoods())
                         .build()))
                 .build();
     }

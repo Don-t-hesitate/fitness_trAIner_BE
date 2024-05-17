@@ -21,5 +21,6 @@ public class UserServiceSignupRequest {
     private String tastePreference;
     private Integer activityLevel;
     private String preferenceTypeFood;
+    private String preferenceFoods;
 
 }
