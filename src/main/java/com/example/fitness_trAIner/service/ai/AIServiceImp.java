@@ -77,7 +77,7 @@ public class AIServiceImp implements AIService{
             int exitCode = process.waitFor();
             System.out.println("Python script exit code: " + exitCode);
             if (exitCode != 0) {
-                throw new AIException("파이썬 파일 실행 결과 오류");
+                throw new AIException("파이썬 파일 실행 결과 오류" + exitCode + result.toString());
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
