@@ -50,6 +50,8 @@ public class User {
     private String preferenceTypeFood;
     @Column(name = "attendance_check")
     private Boolean attendanceCheck;
+    @Column(name = "preference_foods")
+    private String preferenceFoods;
 
 
 

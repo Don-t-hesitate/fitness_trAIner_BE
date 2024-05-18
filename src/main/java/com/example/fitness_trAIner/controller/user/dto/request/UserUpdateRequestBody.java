@@ -20,4 +20,5 @@ public class UserUpdateRequestBody {
     private String tastePreference;
     private Integer activityLevel;
     private String preferenceTypeFood;
+    private String preferenceFoods;
 }
