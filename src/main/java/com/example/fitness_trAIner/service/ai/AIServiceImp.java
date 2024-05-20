@@ -244,23 +244,23 @@ public class AIServiceImp implements AIService{
     }
 
     @Override
-//    public void startTraining(String pythonFilePath, String exerciseName, String params) throws Exception {
-    public void startTraining(String pythonFilePath, String exerciseName) throws Exception {
+    public void startTraining(String pythonFilePath, String exerciseName, String params) throws Exception {
+//    public void startTraining(String pythonFilePath, String exerciseName) throws Exception {
         System.out.println("pythonFilePath: " + pythonFilePath);
-//        System.out.println("params: " + params);
+        System.out.println("params: " + params);
         System.out.println("exerciseName: " + exerciseName);
-//        // params에 있는 파일명에 exerciseAiPath를 추가
-//        String[] words = params.split(" ");
-//        for (int i = 0; i < words.length; i++) {
-//            if (words[i].contains(".json")) {
-//                words[i] = exerciseAiPath + "/" + exerciseName + "/" + words[i];
-//                break;
-//            }
-//        }
-//        params = String.join(" ", words);
+        // params에 있는 파일명에 exerciseAiPath를 추가
+        String[] words = params.split(" ");
+        for (int i = 0; i < words.length; i++) {
+            if (words[i].contains(".json")) {
+                words[i] = exerciseAiPath + "/" + exerciseName + "/" + words[i];
+                break;
+            }
+        }
+        params = String.join(" ", words);
 
-//        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath, params)
-        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath)
+        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath, params)
+//        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath)
                 .redirectOutput(new LogOutputStream() {
                     @Override
                     protected void processLine(String line) {
@@ -374,11 +374,39 @@ public class AIServiceImp implements AIService{
                         modelParams.put(key, primitive.getAsString());
                     }
                 } else if (value.isJsonArray()) {
-                    // JSON 배열 처리 로직 추가
-
+                    // JSON 배열 처리: 각 요소를 리스트에 추가하고, 해당 리스트를 modelParams에 추가
+                    List<Object> list = new ArrayList<>();
+                    for (JsonElement element : value.getAsJsonArray()) {
+                        if (element.isJsonPrimitive()) {
+                            JsonPrimitive primitive = element.getAsJsonPrimitive();
+                            if (primitive.isNumber()) {
+                                list.add(primitive.getAsDouble());
+                            } else if (primitive.isBoolean()) {
+                                list.add(primitive.getAsBoolean());
+                            } else {
+                                list.add(primitive.getAsString());
+                            }
+                        }
+                    }
+                    modelParams.put(key, list);
                 } else if (value.isJsonObject()) {
-                    // JSON 객체 처리 로직 추가
-
+                    // JSON 객체 처리 로직: 재귀적으로 같은 로직을 적용하여 내부의 모든 값을 추출하고, 이를 modelParams에 추가
+                    Map<String, Object> nestedParams = new HashMap<>();
+                    for (Map.Entry<String, JsonElement> nestedEntry : value.getAsJsonObject().entrySet()) {
+                        String nestedKey = nestedEntry.getKey();
+                        JsonElement nestedValue = nestedEntry.getValue();
+                        if (nestedValue.isJsonPrimitive()) {
+                            JsonPrimitive primitive = nestedValue.getAsJsonPrimitive();
+                            if (primitive.isNumber()) {
+                                nestedParams.put(nestedKey, primitive.getAsDouble());
+                            } else if (primitive.isBoolean()) {
+                                nestedParams.put(nestedKey, primitive.getAsBoolean());
+                            } else {
+                                nestedParams.put(nestedKey, primitive.getAsString());
+                            }
+                        }
+                    }
+                    modelParams.put(key, nestedParams);
                 }
             }
 

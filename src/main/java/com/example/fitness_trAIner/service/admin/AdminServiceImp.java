@@ -1,6 +1,8 @@
 package com.example.fitness_trAIner.service.admin;
 
 import com.example.fitness_trAIner.common.exception.exceptions.*;
+import com.example.fitness_trAIner.repository.diet.Food;
+import com.example.fitness_trAIner.repository.diet.FoodRepository;
 import com.example.fitness_trAIner.repository.user.User;
 import com.example.fitness_trAIner.repository.user.UserRepository;
 import com.example.fitness_trAIner.repository.workout.WorkoutVideo;
@@ -14,29 +16,37 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public class AdminServiceImp implements AdminService{
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     private final UserRepository userRepository;
     private final WorkoutVideoRepository workoutVideoRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final FoodRepository foodRepository;
+
+    @Value("${foodpath}")
+    private String excelPath;
 
     @Override
     public AdminServiceLoginResponse loginAdmin(AdminServiceLoginRequest request) {
@@ -149,49 +159,229 @@ public class AdminServiceImp implements AdminService{
     }
 
     @Override
-    public byte[] getExcelFileBytes() throws IOException {
-        // jar 파일로 만들 시 참조 위치 재조정 필요
-//        ClassPathResource classPathResource = new ClassPathResource("food_db_result_final.xlsx");
-//        InputStream inputStream = classPathResource.getInputStream();
-        String filePath = "/home/t24108/aidata/excel/food_db_result_final.xlsx";
+    public byte[] getExcelFileBytes(String filePath) throws IOException {
+        String fileDestPath = excelPath + File.separator + filePath;
 
-        File file = new File(filePath);
+        File file = new File(fileDestPath);
         InputStream inputStream = new FileInputStream(file);
-        return IOUtils.toByteArray(inputStream);
+        byte[] excelFile = IOUtils.toByteArray(inputStream);
+        inputStream.close();
+
+        return excelFile;
     }
 
     @Override
-    public AdminServiceExcelSaveResponse saveExcelData(MultipartFile file) throws IOException {
-        // jar 파일로 만들 시 참조 위치 재조정 필요
-//        String filePath = "D:/temp.xlsx";
-        String filePath = "/home/t24108/aidata/excel/food_db_result_final.xlsx";
-        File dest = new File(filePath);
+    public AdminServiceExcelSaveResponse saveExcelData(MultipartFile file, String filePath) throws IOException {
+        String fileDestPath = excelPath + File.separator + filePath;
+        File dest = new File(fileDestPath);
 
-        // 기존 파일이 있으면 .bak 확장자로 백업
+        System.out.println("file : " + dest.getAbsolutePath());
+        System.out.println("backup : " + dest.getParent() + File.separator + "food_db_result_before_update.xlsx");
+        // 기존 파일이 있으면 파일 이름을 "food_db_result_before_update"로 변경하여 백업
         if (dest.exists()) {
-            String backupFilePath = filePath + ".bak";
+            String backupFilePath = dest.getParent() + File.separator + "food_db_result_before_update.xlsx";
             File backupFile = new File(backupFilePath);
-            Files.move(dest.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(dest.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            if (dest.delete()) {
+                System.out.println("기존 파일 삭제 성공");
+            } else {
+                throw new IOException("기존 파일 삭제 실패", new FileStoreException("기존 파일 삭제 실패"));
+            }
         }
 
-//        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-//            List<Map<String, Object>> excelData = new ArrayList<>();
-//            // 엑셀 파일 읽기 로직 추가
-//
-//            try (Workbook newWorkbook = new XSSFWorkbook()) {
-//                // 엑셀 파일 작성 로직 추가 (excelData를 이용하여 시트, 행, 셀 작성)
-//
-//                try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
-//                    newWorkbook.write(bos);
-//                }
-//            }
-//        }
-        file.transferTo(new File(filePath));
+        file.transferTo(new File(fileDestPath));
+
+        // 엑셀 파일을 읽어서 food db에 변경 사항 반영
+        transactionTemplate.executeWithoutResult(status -> {
+            try {
+                System.out.println("파일 읽기 전임");
+                // 엑셀 파일 읽기
+                Workbook workbook1 = new XSSFWorkbook(new FileInputStream(excelPath + File.separator + "food_db_result_before_update.xlsx"));
+                Workbook workbook2 = new XSSFWorkbook(new FileInputStream(excelPath + File.separator + "food_db_result_final.xlsx"));
+                System.out.println("일단 파일 두 개 불러옴");
+
+                // 각 행을 POJO로 변환 후 리스트에 저장
+                List<Food> list1 = readWorkbook(workbook1);
+                System.out.println("list1 읽음");
+                List<Food> list2 = readWorkbook(workbook2);
+
+                // 음식 아이디 순으로 정렬
+                Collections.sort(list1);
+                Collections.sort(list2);
+
+                // 삭제된 행 찾기
+                List<Food> deletedRows = new ArrayList<>(list1);
+                deletedRows.removeAll(list2);
+
+                // 수정된 행 찾기
+                List<Food> changedRows = new ArrayList<>();
+                int i = 0, j = 0;
+                System.out.println("list1 size: " + list1.size() + ", list2 size: " + list2.size());
+                while (i < list1.size() && j < list2.size()) {
+                    Food food1 = list1.get(i);
+                    Food food2 = list2.get(j);
+                    int compare = food1.getFoodId().compareTo(food2.getFoodId());
+                    if (compare == 0) {
+                        if (!food1.isChanged(food2)) { // 필드 중 하나라도 다르면 수정된 것으로 처리
+                            changedRows.add(food2);
+                        }
+                        i++;
+                        j++;
+                    } else if (food1.compareTo(food2) < 0) { // list1의 foodId가 더 작음
+                        i++;
+                    } else { // list2의 foodId가 더 작음
+                        j++;
+                    }
+                }
+
+                // 추가된 행 찾기
+                List<Food> addedRows = new ArrayList<>(list2);
+                addedRows.removeAll(list1);
+
+                for (Food food : deletedRows) {
+                    System.out.println("삭제할 음식: ");
+                    System.out.println(food.getFoodName());
+                    foodRepository.delete(food);
+                }
+
+                System.out.println("수정된 행: " + changedRows);
+                for (Food food : changedRows) {
+                    System.out.println("수정할 음식: ");
+                    System.out.println(food.getFoodName());
+                    foodRepository.save(food);
+                }
+
+                System.out.println("추가된 행: " + addedRows);
+                for (Food food : addedRows) {
+                    System.out.println("추가할 음식: ");
+                    System.out.println(food.getFoodName());
+                    foodRepository.save(food);
+                }
+
+                System.out.println("list1: ");
+                for (Food food : list1)
+                    System.out.println(food.getFoodId());
+                System.out.println("list2: ");
+                for (Food food : list2)
+                    System.out.println(food.getFoodId());
+
+                workbook1.close();
+                workbook2.close();
+            } catch (IOException e) {
+                // 예외 처리
+                throw new FileStoreException("엑셀 파일 읽기 중 오류 발생");
+            }
+        });
+
 
         return AdminServiceExcelSaveResponse.builder()
-                .fileName(filePath)
+                .fileName(fileDestPath)
                 .size(file.getSize())
                 .fileType(file.getContentType())
+                .build();
+    }
+
+    private List<Food> readWorkbook(Workbook workbook) {
+        List<Food> data = new ArrayList<>();
+        Sheet sheet = workbook.getSheetAt(0);
+        int count = 0;
+        for (Row row : sheet) {
+            count++;
+            // 첫 번째 행은 헤더이므로 skip
+            if (row.getRowNum() == 0) {
+                continue;
+            }
+            Row dataRow = sheet.getRow(row.getRowNum());
+            System.out.println("현재 row 수: " + count);
+            Food food = mapRowToFood(dataRow);
+            data.add(food);
+        }
+        return data;
+    }
+
+//    private List<Food> readExcelData(String filePath) throws IOException {
+//        System.out.println("파일 읽기 시작");
+//        List<Food> data = new ArrayList<>();
+//        try (FileInputStream file = new FileInputStream(new File(filePath))) {
+//            Workbook workbook = new XSSFWorkbook(file);
+//            Sheet sheet = workbook.getSheetAt(0);
+//
+//            System.out.println("파일 읽기 중");
+//            for (Row row : sheet) {
+//                // 첫 번째 행은 헤더이므로 skip
+//                if (row.getRowNum() == 0) {
+//                    continue;
+//                }
+//                Row dataRow = sheet.getRow(row.getRowNum());
+//                System.out.println("현재 row 수: " + row.getRowNum());
+//                Food food = mapRowToFood(dataRow);
+//                data.add(food);
+//            }
+//
+//            workbook.close();
+//            file.close();
+//            System.out.println("파일 읽기 끝");
+//        } catch (IOException e) {
+//            throw new FileStoreException("엑셀 파일 읽기 중 오류 발생");
+//        }
+//
+//        return data;
+//    }
+
+    private Food mapRowToFood(Row row) {
+        double calories = 0;
+        double protein = 0;
+        double fat = 0;
+        double carbohydr = 0;
+
+        for (Cell cell : row) {
+            if (cell.getCellType() == CellType.STRING) {
+                System.out.println("현재 cell: " + cell.getStringCellValue());
+            } else if (cell.getCellType() == CellType.NUMERIC) {
+                System.out.println("현재 cell: " + cell.getNumericCellValue());
+            } else {
+                System.out.println("현재 cell: " + cell.getCellType());
+            }
+        }
+
+        if (row.getCell(4).getCellType() == CellType.STRING) {
+            calories = Double.parseDouble(row.getCell(4).getStringCellValue());
+        } else if (row.getCell(4).getCellType() == CellType.NUMERIC) {
+            calories = row.getCell(4).getNumericCellValue();
+        }
+
+        if (row.getCell(5).getCellType() == CellType.STRING) {
+            protein = Double.parseDouble(row.getCell(5).getStringCellValue());
+        } else if (row.getCell(5).getCellType() == CellType.NUMERIC) {
+            protein = row.getCell(5).getNumericCellValue();
+        }
+
+        if (row.getCell(6).getCellType() == CellType.STRING) {
+            fat = Double.parseDouble(row.getCell(6).getStringCellValue());
+        } else if (row.getCell(6).getCellType() == CellType.NUMERIC) {
+            fat = row.getCell(6).getNumericCellValue();
+        }
+
+        if (row.getCell(7).getCellType() == CellType.STRING) {
+            carbohydr = Double.parseDouble(row.getCell(7).getStringCellValue());
+        } else if (row.getCell(7).getCellType() == CellType.NUMERIC) {
+            carbohydr = row.getCell(7).getNumericCellValue();
+        }
+
+        System.out.println("끝");
+        return Food.builder()
+                .foodId(row.getCell(0).getStringCellValue())
+                .foodName(row.getCell(1).getStringCellValue())
+                .mainType(row.getCell(2).getStringCellValue())
+                .detailType(row.getCell(3).getStringCellValue())
+                .calories(calories)
+                .protein(protein)
+                .fat(fat)
+                .carbohydr(carbohydr)
+                .taste(row.getCell(8).getStringCellValue())
+                .mainIngredient(row.getCell(9).getStringCellValue())
+                .secondaryIngredient(row.getCell(10).getStringCellValue())
+                .cookingMethod(row.getCell(11).getStringCellValue())
                 .build();
     }
 
