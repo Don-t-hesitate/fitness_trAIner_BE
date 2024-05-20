@@ -1,9 +1,7 @@
 package com.example.fitness_trAIner.controller.diet;
 
-import com.example.fitness_trAIner.common.exception.exceptions.InvalidCategoryException;
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
-import com.example.fitness_trAIner.controller.diet.dto.request.DietRecommendRequestBody;
 import com.example.fitness_trAIner.service.diet.DietService;
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceRecommendRequest;
 import com.example.fitness_trAIner.service.diet.dto.response.DietServiceRecommendResponse;
@@ -16,7 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/diets")
 @Tag(name = "Diet", description = "식단 관련 API")
@@ -26,21 +25,32 @@ public class DietController {
 
     private final DietService dietService;
 
-    @PostMapping("/recommend")
-    @Operation(summary = "식단 조회", description = "식단 조회 API")
+    @GetMapping("/{userId}")
+    @Operation(summary = "식단 추천 받기", description = "사용자 ID로 DB를 조회, 선호 음식 5가지를 바탕으로 식단 추천")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<DietServiceRecommendResponse> findAllDietList(@RequestBody DietRecommendRequestBody requestBody) throws IOException {
+    public final GlobalResponse<DietServiceRecommendResponse> getRecommendedDiet(@PathVariable Long userId) throws IOException {
 
 
         return GlobalResponse.<DietServiceRecommendResponse>builder()
-                .message("식단조회")
+                .message("식단 추천 성공")
                 .result(dietService.recommendDiet(DietServiceRecommendRequest.builder()
-                        .category(requestBody.getCategory())
-                        .userId(requestBody.getUserId())
+                        .userId(userId)
                         .build()))
                 .build();
 
+    }
+
+    @GetMapping("/{userId}/{dietDate}")
+    @Operation(summary = "식단 조회", description = "식단 조회 API")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<List<Map>> findDietOfDay(@PathVariable Long userId, @PathVariable String dietDate) throws IOException {
+
+        return GlobalResponse.<List<Map>>builder()
+                .message("식단 조회 성공")
+                .result(dietService.findDietOfDay(userId, dietDate))
+                .build();
     }
 
 }

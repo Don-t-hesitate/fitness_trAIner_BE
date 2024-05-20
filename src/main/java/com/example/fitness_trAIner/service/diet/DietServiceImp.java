@@ -1,6 +1,5 @@
 package com.example.fitness_trAIner.service.diet;
 
-import com.example.fitness_trAIner.common.exception.exceptions.InvalidCategoryException;
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
 import com.example.fitness_trAIner.repository.user.UserRepository;
 import com.example.fitness_trAIner.service.diet.dto.DietServiceInitialFoodList;
@@ -22,6 +21,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,6 @@ public class DietServiceImp implements DietService{
     @Override
     public DietServiceRecommendResponse recommendDiet(DietServiceRecommendRequest request) throws IOException {
 
-        String category = Optional.ofNullable(request.getCategory()).orElseThrow(() -> new InvalidCategoryException("카테고리가 필요합니다."));
         Long userId = Optional.ofNullable(request.getUserId()).orElseThrow(() -> new NoUserException("유저 아이디가 필요합니다."));
 
         String preferenceTypeFood = userRepository.findById(userId).get().getPreferenceFoods();
@@ -166,5 +165,36 @@ public class DietServiceImp implements DietService{
         return rows;
     }
 
+    @Override
+    public List<Map> findDietOfDay(Long userId, String dietDate) throws IOException {
+        // userId가 실재하는지 확인
+        if (!userRepository.existsById(userId)) {
+            throw new NoUserException("존재하지 않는 사용자");
+        }
+
+        // dietDate가 '2024.05.20'의 형식이므로 java.time.LocalDate에 맞게 변환
+        dietDate = dietDate.replace(".", "-");
+        LocalDate localDietDate = LocalDate.parse(dietDate);
+
+        //diet 테이블에서 userId와 dietDate에 해당하는 식단 정보를 가져옴
+        List<Map> dietList = entityManager.createQuery(
+                "SELECT new map(d.dietId as dietId, d.foodId as foodId, d.eatDate as eatDate, d.totalCalories as totalCalories) " +
+                        "FROM Diet d " +
+                        "WHERE d.userId = :userId AND d.eatDate = :dietDate", Map.class)
+                .setParameter("userId", userId)
+                .setParameter("dietDate", localDietDate)
+                .getResultList();
+
+        // 해당 음식 정보를 food 테이블에서 가져오기
+        List<Map> foodList = entityManager.createQuery(
+                "SELECT new map(f.foodId as foodId, f.foodName as foodName, f.calories as calories) " +
+                        "FROM Food f " +
+                        "WHERE f.foodId IN :foodIdList", Map.class)
+                .setParameter("foodIdList", dietList.stream().map(diet -> diet.get("foodId")).toList())
+                .getResultList();
+
+        // dietList와 foodList를 각각 dietList: {}, fooodList: {}인 Object로 변환하여 반환
+        return List.of(Map.of("dietList", dietList), Map.of("foodList", foodList));
+    }
 
 }
