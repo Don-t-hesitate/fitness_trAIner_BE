@@ -10,4 +10,5 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DietServiceRecommendRequest {
     private String category;
+    private Long userId;
 }

@@ -2,7 +2,6 @@ package com.example.fitness_trAIner.controller.admin;
 
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
-import com.example.fitness_trAIner.controller.admin.dto.request.AdminExcelSaveRequestBody;
 import com.example.fitness_trAIner.controller.admin.dto.request.AdminLoginRequestBody;
 import com.example.fitness_trAIner.controller.admin.dto.request.AdminUserPrefUpdateRequestBody;
 import com.example.fitness_trAIner.controller.admin.dto.request.AdminUserUpdateRequestBody;
@@ -148,13 +147,12 @@ public class AdminController {
                 .body(resource);
     }
 
-    @PostMapping("/excel")
+    @PostMapping(value = "/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "엑셀 파일 저장", description = "웹에서 엑셀 파일 업로드")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public GlobalResponse<AdminServiceExcelSaveResponse> saveExcelData(AdminExcelSaveRequestBody requestBody) {
+    public GlobalResponse<AdminServiceExcelSaveResponse> saveExcelData(@RequestPart MultipartFile file) {
         try {
-            MultipartFile file = requestBody.getFile();
             return GlobalResponse.<AdminServiceExcelSaveResponse>builder()
                     .message("엑셀 파일 업로드 성공")
                     .result(adminService.saveExcelData(file))

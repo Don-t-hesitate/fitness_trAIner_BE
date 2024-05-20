@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RequestMapping("/diets")
@@ -25,25 +26,19 @@ public class DietController {
 
     private final DietService dietService;
 
-    @GetMapping
+    @PostMapping("/recommend")
     @Operation(summary = "식단 조회", description = "식단 조회 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<DietServiceRecommendResponse> findAllDietList(
-            @RequestParam(required = false) String category) {
+    public final GlobalResponse<DietServiceRecommendResponse> findAllDietList(@RequestBody DietRecommendRequestBody requestBody) throws IOException {
 
-        String validatedCategory = Optional.ofNullable(category)
-                .orElseThrow(() -> new InvalidCategoryException("카테고리가 필요합니다."));
-
-        DietServiceRecommendRequest request = DietServiceRecommendRequest.builder()
-                .category(validatedCategory)
-                .build();
-
-        DietServiceRecommendResponse response = dietService.recommendDiet(request);
 
         return GlobalResponse.<DietServiceRecommendResponse>builder()
                 .message("식단조회")
-                .result(response)
+                .result(dietService.recommendDiet(DietServiceRecommendRequest.builder()
+                        .category(requestBody.getCategory())
+                        .userId(requestBody.getUserId())
+                        .build()))
                 .build();
 
     }

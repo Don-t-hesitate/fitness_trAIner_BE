@@ -7,7 +7,9 @@ import lombok.Getter;
 
 @Getter
 @Data
+@AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class DietRecommendRequestBody {
     private String category;
+    private Long userId;
 
 }
