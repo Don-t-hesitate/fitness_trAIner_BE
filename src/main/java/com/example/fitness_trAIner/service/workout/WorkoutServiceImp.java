@@ -94,20 +94,25 @@ public class WorkoutServiceImp implements WorkoutService {
 
         Note note = noteRepository.save(Note.builder().userId(userId).build());
 
+        try {
 
-        UserScore userScore = (userScoreRepository.existsByUserIdAndExerciseName(note.getUserId(), "총점")
-                ? userScoreRepository.findByUserIdAndExerciseName(note.getUserId(), "총점").orElseThrow(()-> new ScoreException("점수 DB조회 오류"))
-                : userScoreRepository.save(UserScore.builder()
-                .userId(note.getUserId())
-                .exerciseName("총점")
-                .score(0)
-                .build()));
-        if(!user.getAttendanceCheck()) {
-            user.setAttendanceCheck(true);
-            userRepository.save(user);
-            userScore.setScore(userScore.getScore() + 50);
-            userScoreRepository.save(userScore);
+            UserScore userScore = (userScoreRepository.existsByUserIdAndExerciseName(note.getUserId(), "총점")
+                    ? userScoreRepository.findByUserIdAndExerciseName(note.getUserId(), "총점").orElseThrow(() -> new ScoreException("점수 DB조회 오류"))
+                    : userScoreRepository.save(UserScore.builder()
+                    .userId(note.getUserId())
+                    .exerciseName("총점")
+                    .score(0)
+                    .build()));
+            if (!user.getAttendanceCheck()) {
+                user.setAttendanceCheck(true);
+                userRepository.save(user);
+                userScore.setScore(userScore.getScore() + 50);
+                userScoreRepository.save(userScore);
 
+            }
+        }
+        catch (Exception e) {
+            throw new NoteException("노트 생성 오류");
         }
 
         return WorkoutServiceSaveNoteResponse.builder()
