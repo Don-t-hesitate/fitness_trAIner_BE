@@ -17,8 +17,8 @@ public interface AdminService {
     public String deleteUser(Long id);
     public String adminUpdateUserPref(AdminServiceUserPrefUpdateRequest request);
     public List<AdminServiceUserFoodPreferencesResponse> getAllUserFoodPreferences();
-    byte[] getExcelFileBytes() throws IOException;
-    public AdminServiceExcelSaveResponse saveExcelData(MultipartFile file) throws IOException;
+    byte[] getExcelFileBytes(String filePath) throws IOException;
+    public AdminServiceExcelSaveResponse saveExcelData(MultipartFile file, String filePath) throws IOException;
 
     public AdminServiceFindWorkoutVideoListResponse findWorkoutVideoList();
     public String deleteWorkoutVideo(Long wokroutVideoId);

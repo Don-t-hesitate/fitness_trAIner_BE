@@ -51,14 +51,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
         // WebSocket 통신을 위한 Cors 설정
         registry.addMapping("/topic/**")
-                .allowedOriginPatterns("http://localhost:3000") // 허용할 Origin 설정
-//                .allowedOriginPatterns("http://localhost:60008") // 허용할 Origin 설정
+//                .allowedOriginPatterns("http://localhost:3000") // 허용할 Origin 설정
+                .allowedOriginPatterns("http://localhost:60008") // 허용할 Origin 설정
                 .allowedMethods("GET", "POST", "PUT", "DELETE") // 허용할 HTTP Method 설정
                 .allowedHeaders("*") // 허용할 HTTP Header 설정
                 .allowCredentials(true); // 응답 헤더에 Credentials 허용 설정
         registry.addMapping("/ai/workout/train")
-                .allowedOriginPatterns("http://localhost:3000") // 허용할 Origin 설정
-//                .allowedOriginPatterns("http://localhost:60008") // 허용할 Origin 설정
+//                .allowedOriginPatterns("http://localhost:3000") // 허용할 Origin 설정
+                .allowedOriginPatterns("http://localhost:60008") // 허용할 Origin 설정
                 .allowedMethods("GET", "POST", "PUT", "DELETE") // 허용할 HTTP Method 설정
                 .allowedHeaders("*") // 허용할 HTTP Header 설정
                 .allowCredentials(true); // 응답 헤더에 Credentials 허용 설정

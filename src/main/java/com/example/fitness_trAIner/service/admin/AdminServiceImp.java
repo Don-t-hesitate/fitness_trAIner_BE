@@ -20,10 +20,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +31,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -162,10 +159,10 @@ public class AdminServiceImp implements AdminService{
     }
 
     @Override
-    public byte[] getExcelFileBytes() throws IOException {
-        String filePath = excelPath + File.separator + "food_db_result_final.xlsx";
+    public byte[] getExcelFileBytes(String filePath) throws IOException {
+        String fileDestPath = excelPath + File.separator + filePath;
 
-        File file = new File(filePath);
+        File file = new File(fileDestPath);
         InputStream inputStream = new FileInputStream(file);
         byte[] excelFile = IOUtils.toByteArray(inputStream);
         inputStream.close();
@@ -174,9 +171,9 @@ public class AdminServiceImp implements AdminService{
     }
 
     @Override
-    public AdminServiceExcelSaveResponse saveExcelData(MultipartFile file) throws IOException {
-        String filePath = excelPath + File.separator + "food_db_result_final.xlsx";
-        File dest = new File(filePath);
+    public AdminServiceExcelSaveResponse saveExcelData(MultipartFile file, String filePath) throws IOException {
+        String fileDestPath = excelPath + File.separator + filePath;
+        File dest = new File(fileDestPath);
 
         System.out.println("file : " + dest.getAbsolutePath());
         System.out.println("backup : " + dest.getParent() + File.separator + "food_db_result_before_update.xlsx");
@@ -192,7 +189,7 @@ public class AdminServiceImp implements AdminService{
             }
         }
 
-        file.transferTo(new File(filePath));
+        file.transferTo(new File(fileDestPath));
 
         // 엑셀 파일을 읽어서 food db에 변경 사항 반영
         transactionTemplate.executeWithoutResult(status -> {
@@ -278,7 +275,7 @@ public class AdminServiceImp implements AdminService{
 
 
         return AdminServiceExcelSaveResponse.builder()
-                .fileName(filePath)
+                .fileName(fileDestPath)
                 .size(file.getSize())
                 .fileType(file.getContentType())
                 .build();

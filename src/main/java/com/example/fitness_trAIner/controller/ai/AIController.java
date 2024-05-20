@@ -161,11 +161,11 @@ public class AIController {
     public void start(String requestData) throws Exception { // AI 학습 시작, WebSocket 통신
         ObjectMapper objectMapper = new ObjectMapper();
         String pythonFilePath = objectMapper.readTree(requestData).get("pythonFilePath").asText();
-//        String params = objectMapper.readTree(requestData).get("params").toString();
+        String params = objectMapper.readTree(requestData).get("params").toString();
         String exerciseName = objectMapper.readTree(requestData).get("exerciseName").asText();
 
-//        aiService.startTraining(pythonFilePath, exerciseName, params);
-        aiService.startTraining(pythonFilePath, exerciseName);
+        aiService.startTraining(pythonFilePath, exerciseName, params);
+//        aiService.startTraining(pythonFilePath, exerciseName);
     }
 
     @GetMapping(path = "/exercise/list")

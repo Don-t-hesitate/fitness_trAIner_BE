@@ -10,4 +10,5 @@ import java.util.List;
 public interface DietRepository extends JpaRepository<Diet, Long> {
     Diet save(Diet diet);
 
+    List<Diet> findByUserIdAndEatDate(Long userId, LocalDate parse);
 }
