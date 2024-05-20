@@ -1,11 +1,16 @@
 package com.example.fitness_trAIner.service.diet;
 
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
+import com.example.fitness_trAIner.repository.diet.Diet;
+import com.example.fitness_trAIner.repository.diet.DietRepository;
+import com.example.fitness_trAIner.repository.diet.FoodRepository;
 import com.example.fitness_trAIner.repository.user.UserRepository;
 import com.example.fitness_trAIner.service.diet.dto.DietServiceInitialFoodList;
 import com.example.fitness_trAIner.service.diet.dto.DietServiceUserFoodInfo;
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceRecommendRequest;
+import com.example.fitness_trAIner.service.diet.dto.request.DietServiceSaveDayOfUsersRequest;
 import com.example.fitness_trAIner.service.diet.dto.response.DietServiceRecommendResponse;
+import com.example.fitness_trAIner.vos.DietVO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
@@ -22,10 +27,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -33,6 +35,8 @@ import java.util.Optional;
 public class DietServiceImp implements DietService{
 
     private final UserRepository userRepository;
+    private final DietRepository dietRepository;
+    private final FoodRepository foodRepository;
     @Value("${foodpath}")
     private String foodPath;
 
@@ -131,8 +135,6 @@ public class DietServiceImp implements DietService{
             System.out.println("food: " + food);
         }
 
-        // foodResultList의 것들
-//        List<Map<String, Object>> foodResultMapList = objectMapper.readValue(foodResultList.toString(), new TypeReference<List<Map<String, Object>>>() {});
         List<Map<String, Object>> foodResultMapList = objectMapper.readValue(String.join("", foodResultList), new TypeReference<List<Map<String, Object>>>() {});
 
         return DietServiceRecommendResponse.builder()
@@ -195,6 +197,76 @@ public class DietServiceImp implements DietService{
 
         // dietList와 foodList를 각각 dietList: {}, fooodList: {}인 Object로 변환하여 반환
         return List.of(Map.of("dietList", dietList), Map.of("foodList", foodList));
+    }
+
+    @Override
+    public String saveDiet(DietServiceSaveDayOfUsersRequest requestBody) {
+
+        for (DietVO dietVO : requestBody.getDietList()) {
+            Diet diet = new Diet();
+
+            if (!userRepository.existsById(dietVO.getUserId())) {
+                throw new NoUserException("존재하지 않는 사용자");
+            } else {
+                diet.setUserId(dietVO.getUserId());
+            }
+            diet.setEatDate(LocalDate.parse(dietVO.getDietDate()));
+            if (!foodRepository.existsById(dietVO.getFoodId())) {
+                throw new NoUserException("존재하지 않는 음식");
+            } else {
+                diet.setFoodId(dietVO.getFoodId());
+            }
+            diet.setTotalCalories(dietVO.getTotalCalories());
+            dietRepository.save(diet);
+        }
+
+        return "식단 저장 성공";
+    }
+
+    @Override
+    public Integer findDietScore(Long userId, String date) {
+
+        // userId가 실재하는지 확인
+        if (!userRepository.existsById((long) userId)) {
+            throw new NoUserException("존재하지 않는 사용자");
+        }
+
+        // date가 '2024-05-20'의 형식이므로 java.time.LocalDate에 맞게 변환
+        date = date.replace(".", "-");
+
+        // note 테이블에서 workout_date가 date이고 userId가 파라미터의 userId일 때 note 테이블의 total_kcal을 가져옴
+        List<Map> workoutList = entityManager.createQuery(
+                "SELECT new map(n.workoutDate as workoutDate, n.totalKcal as totalKcal) " +
+                        "FROM Note n " +
+                        "WHERE n.userId = :userId AND n.workoutDate = :date", Map.class)
+                .setParameter("userId", userId)
+                .setParameter("date", LocalDate.parse(date))
+                .getResultList();
+
+        int workoutKcal = 0;
+        for (Map workout : workoutList) {
+            System.out.println("workout: " + workout);
+            workoutKcal += (int) workout.get("totalKcal");
+        }
+        System.out.println("workoutKcal: " + workoutKcal);
+
+        // date일에 해당하고 userId가 파라미터의 userId일 때의 식단의 칼로리를 모두 가져와서 dietKcal에 더함
+        List<Map> dietList = entityManager.createQuery(
+                "SELECT new map(d.totalCalories as totalCalories, d.eatDate as eatDate) " +
+                        "FROM Diet d " +
+                        "WHERE d.userId = :userId AND d.eatDate = :date", Map.class)
+                .setParameter("userId", userId)
+                .setParameter("date", LocalDate.parse(date))
+                .getResultList();
+
+        Double dietKcal = 0.0;
+        for (Map diet : dietList) {
+            System.out.println("diet: " + diet);
+            dietKcal += (Double) diet.get("totalCalories");
+        }
+        System.out.println("dietKcal: " + dietKcal + ", dietKcal.intValue(): " + dietKcal.intValue());
+
+        return (dietKcal.intValue() - workoutKcal);
     }
 
 }
