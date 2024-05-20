@@ -2,6 +2,7 @@ package com.example.fitness_trAIner.controller.diet;
 
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
+import com.example.fitness_trAIner.controller.diet.dto.request.DietSaveDayOfUsersRequestBody;
 import com.example.fitness_trAIner.service.diet.DietService;
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceSaveDayOfUsersRequest;
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceRecommendRequest;
@@ -58,23 +59,13 @@ public class DietController {
     @Operation(summary = "식단 저장", description = "식단 저장 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> saveDiet(@RequestBody DietServiceSaveDayOfUsersRequest requestBody) throws IOException {
+    public final GlobalResponse<String> saveDiet(@RequestBody DietSaveDayOfUsersRequestBody requestBody) throws IOException {
 
         return GlobalResponse.<String>builder()
                 .message("식단 저장 성공")
-                .result(dietService.saveDiet(requestBody))
-                .build();
-    }
-
-    @GetMapping("/score/{userId}/{date}")
-    @Operation(summary = "식단 점수 조회", description = "해당 일자의 운동으로 소모한 총 칼로리를 해당 일자에 섭취한 총 칼로리에서 뺀 값 \n 즉 (섭취 칼로리 - 소모 칼로리)")
-    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
-    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<Integer> findDietScore(@PathVariable Long userId, @PathVariable String date) throws IOException {
-
-        return GlobalResponse.<Integer>builder()
-                .message("식단 점수 조회 성공")
-                .result(dietService.findDietScore(userId, date))
+                .result(dietService.saveDiet(DietServiceSaveDayOfUsersRequest.builder()
+                        .dietList(requestBody.getDietList())
+                        .build()))
                 .build();
     }
 

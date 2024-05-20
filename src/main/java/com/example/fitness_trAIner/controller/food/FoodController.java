@@ -2,8 +2,8 @@ package com.example.fitness_trAIner.controller.food;
 
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
-import com.example.fitness_trAIner.service.Food.FoodService;
-import com.example.fitness_trAIner.service.Food.dto.response.FoodServiceListForSignUpResponse;
+import com.example.fitness_trAIner.service.food.FoodService;
+import com.example.fitness_trAIner.service.food.dto.response.FoodServiceListForSignUpResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 @RequestMapping("/foods")
 @Tag(name = "Food", description = "음식 관련 API")

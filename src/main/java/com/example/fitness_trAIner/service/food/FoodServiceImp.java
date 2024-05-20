@@ -1,6 +1,6 @@
-package com.example.fitness_trAIner.service.Food;
+package com.example.fitness_trAIner.service.food;
 
-import com.example.fitness_trAIner.service.Food.dto.response.FoodServiceListForSignUpResponse;
+import com.example.fitness_trAIner.service.food.dto.response.FoodServiceListForSignUpResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

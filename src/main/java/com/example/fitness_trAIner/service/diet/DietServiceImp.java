@@ -3,8 +3,12 @@ package com.example.fitness_trAIner.service.diet;
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
 import com.example.fitness_trAIner.repository.diet.Diet;
 import com.example.fitness_trAIner.repository.diet.DietRepository;
+import com.example.fitness_trAIner.repository.diet.Food;
 import com.example.fitness_trAIner.repository.diet.FoodRepository;
+import com.example.fitness_trAIner.repository.user.User;
 import com.example.fitness_trAIner.repository.user.UserRepository;
+import com.example.fitness_trAIner.repository.user.UserScore;
+import com.example.fitness_trAIner.repository.user.UserScoreRepository;
 import com.example.fitness_trAIner.service.diet.dto.DietServiceInitialFoodList;
 import com.example.fitness_trAIner.service.diet.dto.DietServiceUserFoodInfo;
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceRecommendRequest;
@@ -37,6 +41,7 @@ public class DietServiceImp implements DietService{
     private final UserRepository userRepository;
     private final DietRepository dietRepository;
     private final FoodRepository foodRepository;
+    private final UserScoreRepository userScoreRepository;
     @Value("${foodpath}")
     private String foodPath;
 
@@ -203,70 +208,135 @@ public class DietServiceImp implements DietService{
     public String saveDiet(DietServiceSaveDayOfUsersRequest requestBody) {
 
         for (DietVO dietVO : requestBody.getDietList()) {
+            Long userId = dietVO.getUserId();
+            String date = dietVO.getDietDate();
+            String eatDate = dietVO.getDietDate();
             Diet diet = new Diet();
 
+            // userId가 실재하는지 확인
             if (!userRepository.existsById(dietVO.getUserId())) {
                 throw new NoUserException("존재하지 않는 사용자");
             } else {
+                // 사용자 ID 저장
                 diet.setUserId(dietVO.getUserId());
             }
-            diet.setEatDate(LocalDate.parse(dietVO.getDietDate()));
-            if (!foodRepository.existsById(dietVO.getFoodId())) {
+
+            // eatDate가 '2024.05.20'의 형식이므로 java.time.LocalDate에 맞게 변환하여 저장
+            eatDate = eatDate.replace(".", "-");
+            LocalDate localEatDate = LocalDate.parse(eatDate);
+            diet.setEatDate(localEatDate);
+
+            // foodName이 존재하는지 확인
+            if (foodRepository.findByFoodName(dietVO.getFoodName()).getFoodId() == null) {
                 throw new NoUserException("존재하지 않는 음식");
             } else {
-                diet.setFoodId(dietVO.getFoodId());
+                Food food = foodRepository.findByFoodName(dietVO.getFoodName());
+                // 음식 ID 저장
+                diet.setFoodId(food.getFoodId());
+                // 총 칼로리 저장
+                diet.setTotalCalories(food.getCalories());
             }
-            diet.setTotalCalories(dietVO.getTotalCalories());
+
             dietRepository.save(diet);
+
+            saveDietScore(userId, date);
         }
 
         return "식단 저장 성공";
     }
 
-    @Override
-    public Integer findDietScore(Long userId, String date) {
+    private int calculateDietScore(User user, double totalCalories) {
+        double bmr = calculateBMR(user);
+        double tdee = calculateTDEE(user, bmr);
 
-        // userId가 실재하는지 확인
-        if (!userRepository.existsById((long) userId)) {
-            throw new NoUserException("존재하지 않는 사용자");
+        // 점수 범위 계산
+        double lowerLimit = tdee * 0.9;
+        double upperLimit = tdee * 1.1;
+
+        // 총 칼로리가 TDEE의 90% ~ 110% 범위에 있으면 100점, 그 외에는 비례하여 점수 계산
+        if (totalCalories >= lowerLimit && totalCalories <= upperLimit) {
+            return 100;
+        } else if (totalCalories < lowerLimit) {
+            return (int) ((totalCalories / lowerLimit) * 100);
+        } else {
+            return (int) ((upperLimit / totalCalories) * 100);
         }
-
-        // date가 '2024-05-20'의 형식이므로 java.time.LocalDate에 맞게 변환
-        date = date.replace(".", "-");
-
-        // note 테이블에서 workout_date가 date이고 userId가 파라미터의 userId일 때 note 테이블의 total_kcal을 가져옴
-        List<Map> workoutList = entityManager.createQuery(
-                "SELECT new map(n.workoutDate as workoutDate, n.totalKcal as totalKcal) " +
-                        "FROM Note n " +
-                        "WHERE n.userId = :userId AND n.workoutDate = :date", Map.class)
-                .setParameter("userId", userId)
-                .setParameter("date", LocalDate.parse(date))
-                .getResultList();
-
-        int workoutKcal = 0;
-        for (Map workout : workoutList) {
-            System.out.println("workout: " + workout);
-            workoutKcal += (int) workout.get("totalKcal");
-        }
-        System.out.println("workoutKcal: " + workoutKcal);
-
-        // date일에 해당하고 userId가 파라미터의 userId일 때의 식단의 칼로리를 모두 가져와서 dietKcal에 더함
-        List<Map> dietList = entityManager.createQuery(
-                "SELECT new map(d.totalCalories as totalCalories, d.eatDate as eatDate) " +
-                        "FROM Diet d " +
-                        "WHERE d.userId = :userId AND d.eatDate = :date", Map.class)
-                .setParameter("userId", userId)
-                .setParameter("date", LocalDate.parse(date))
-                .getResultList();
-
-        Double dietKcal = 0.0;
-        for (Map diet : dietList) {
-            System.out.println("diet: " + diet);
-            dietKcal += (Double) diet.get("totalCalories");
-        }
-        System.out.println("dietKcal: " + dietKcal + ", dietKcal.intValue(): " + dietKcal.intValue());
-
-        return (dietKcal.intValue() - workoutKcal);
     }
 
+    private double calculateBMR(User user) {
+        // BMR 계산
+        double bmr;
+        if (user.getGender().equals("M")) {
+            bmr = 88.362 + (13.397 * user.getWeight()) + (4.799 * user.getHeight()) - (5.677 * user.getAge());
+        } else {
+            bmr = 447.593 + (9.247 * user.getWeight()) + (3.098 * user.getHeight()) - (4.330 * user.getAge());
+        }
+        return bmr;
+    }
+
+    private double calculateTDEE(User user, double bmr) {
+        // TDEE 계산
+        int activityLevel = user.getActivityLevel();
+        double tdee;
+
+        switch (activityLevel) {
+            case 1:
+                tdee = bmr * 1.2;
+                break;
+            case 2:
+                tdee = bmr * 1.375;
+                break;
+            case 3:
+                tdee = bmr * 1.55;
+                break;
+            case 4:
+                tdee = bmr * 1.725;
+                break;
+            case 5:
+                tdee = bmr * 1.9;
+                break;
+            default:
+                throw new IllegalArgumentException("올바르지 않은 활동 수준입니다.");
+        }
+
+        return tdee;
+    }
+
+    private void saveDietScore(Long userId, String date) {
+        LocalDate workoutDate = LocalDate.parse(date);
+        Optional<UserScore> scores = userScoreRepository.findByUserIdAndExerciseName(userId, "총점");
+
+        // 해당 날짜의 총 섭취 칼로리 계산
+        double totalCalories = dietRepository.findByUserIdAndEatDate(userId, workoutDate)
+                .stream()
+                .mapToDouble(Diet::getTotalCalories)
+                .sum();
+
+        // 사용자 정보 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoUserException("존재하지 않는 사용자"));
+
+        // 식단 점수 계산
+        int score = calculateDietScore(user, totalCalories);
+
+        if (!scores.isEmpty()) {
+            UserScore userScore = scores.get();
+            userScore.setScore(score);
+            userScoreRepository.save(userScore);
+        } else {
+            // UserScore에 exerciseName이 '총점'이고 userId가 같은 데이터가 있을 경우 업데이트, 없을 경우 새로 생성
+            if (userScoreRepository.existsByUserIdAndExerciseName(userId, "총점")) {
+                UserScore userScore = userScoreRepository.findByUserIdAndExerciseName(userId, "총점")
+                        .orElseThrow(() -> new NoUserException("존재하지 않는 사용자"));
+                userScore.setScore(score);
+                userScoreRepository.save(userScore);
+            } else {
+                UserScore userScore = new UserScore();
+                userScore.setUserId(userId);
+                userScore.setExerciseName("총점");
+                userScore.setScore(score);
+                userScoreRepository.save(userScore);
+            }
+        }
+    }
 }

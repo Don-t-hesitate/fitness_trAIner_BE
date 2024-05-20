@@ -10,6 +10,5 @@ import lombok.Setter;
 public class DietVO {
     private Long userId;
     private String dietDate;
-    private String foodId;
-    private Double totalCalories;
+    private String foodName;
 }

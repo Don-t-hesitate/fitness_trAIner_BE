@@ -1,4 +1,4 @@
-package com.example.fitness_trAIner.service.Food.dto.response;
+package com.example.fitness_trAIner.service.food.dto.response;
 
 import lombok.*;
 

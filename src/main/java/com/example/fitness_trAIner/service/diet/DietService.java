@@ -12,5 +12,4 @@ public interface DietService {
     DietServiceRecommendResponse recommendDiet(DietServiceRecommendRequest request) throws IOException;
     List<Map> findDietOfDay(Long userId, String dietDate) throws IOException;
     String saveDiet(DietServiceSaveDayOfUsersRequest requestBody);
-    Integer findDietScore(Long userId, String date);
 }
