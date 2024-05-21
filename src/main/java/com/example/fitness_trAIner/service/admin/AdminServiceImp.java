@@ -107,6 +107,7 @@ public class AdminServiceImp implements AdminService{
         user.setTastePreference(request.getTastePreference());
         user.setActivityLevel(request.getActivityLevel());
         user.setPreferenceTypeFood(request.getPreferenceTypeFood());
+        user.setPreferenceFoods(request.getPreferenceFoods());
 
         userRepository.save(user);
 

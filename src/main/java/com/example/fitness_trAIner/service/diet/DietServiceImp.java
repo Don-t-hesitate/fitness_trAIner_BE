@@ -100,10 +100,15 @@ public class DietServiceImp implements DietService{
         Map<String, Object> userData = objectMapper.convertValue(userFoodInfo, Map.class);
         userData.put("matchingFoodList", matchingFoodList);
         String userDataJson = objectMapper.writeValueAsString(userData);
-        System.out.println("userDataJson: " + userDataJson);
+//        String parameter = userDataJson.replace("\"", "\""); // 파이썬 스크립트에서 사용자 정보를 받을 때 따옴표를 인식하기 위해 따옴표를 이스케이프 처리
+//        for (DietServiceInitialFoodList matchnFood : matchingFoodList) {
+//            System.out.println("matchnFood: " + matchnFood.getFoodName() + ", " + matchnFood.getTaste() + ", " + matchnFood.getMainIngredient() + ", " + matchnFood.getSecondaryIngredient() + ", " + matchnFood.getCookMethod());
+//        }
+        System.out.println("userDataJson!: " + userDataJson + "\n");
+//        System.out.println("parameter: " + parameter);
 
-        // 파이썬 스크립트에서 사용자의 정보를 바탕으로 사용자에게 맞는 식단 추천 받기
-        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", "\""+ userDataJson.replace("\"", "\\\"") + "\"");
+        // 파이썬 스크립트에서 사용자의 정보를 바탕으로 사용자에게 맞는 식단 추천 받기, 리눅스는 인자를 공백으로 구분하여 인식
+        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", userDataJson);
         Process process = processBuilder.start();
 
         // 파이썬 스크립트에서 추천된 식단을 받아오기
@@ -126,7 +131,13 @@ public class DietServiceImp implements DietService{
             }
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                log.error("파이썬 스크립트 실행 중 오류 발생");
+                List<String> errorList = new ArrayList<>();
+                errorList = errorReader.lines().toList();
+                log.error("파이썬 스크립트 실행 중 오류 발생: ");
+                // 파이썬의 오류 메세지 다중 출력
+                for (String error : errorList) {
+                    log.error(error);
+                }
                 log.error("error: " + errorReader.readLine());
                 reader.close(); errorReader.close();
                 throw new IOException("파이썬 스크립트 실행 중 오류 발생" + exitCode + " " + errorReader.readLine());
