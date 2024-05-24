@@ -11,4 +11,5 @@ public interface DietRepository extends JpaRepository<Diet, Long> {
     Diet save(Diet diet);
 
     List<Diet> findByUserIdAndEatDate(Long userId, LocalDate parse);
+    List<Diet> findByUserId(Long userId);
 }

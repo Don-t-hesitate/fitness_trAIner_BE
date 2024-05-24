@@ -53,6 +53,7 @@ public class DietServiceImp implements DietService{
 
         Long userId = Optional.ofNullable(request.getUserId()).orElseThrow(() -> new NoUserException("유저 아이디가 필요합니다."));
 
+        // user 테이블에서 userId에 해당하는 사용자의 선호 음식 가져옴
         String preferenceTypeFood = userRepository.findById(userId).get().getPreferenceFoods();
         String[] preferArray = preferenceTypeFood.split(",");
         List<DietServiceInitialFoodList> foodList = getFoodList(foodPath + File.separator + "select_food_list.csv");
@@ -65,25 +66,6 @@ public class DietServiceImp implements DietService{
 
         }
 
-//        return  DietServiceRecommendResponse.builder()
-//                .foodRecommend(matchingFoodList)
-//                .build();
-
-
-//        List<String> foodList = new ArrayList<>();
-//        int totalCalorie = 1480; // 예시 값
-//
-//        foodList = switch (category) {
-//            case "korean" -> Arrays.asList("흑미밥", "된장찌개", "제육볶음", "순살 후라이드 치킨", "김치");
-//            case "chinese" -> Arrays.asList("짜장면", "탕수육", "마라탕", "유산슬", "제로 탕후루");
-//            case "japanese" -> Arrays.asList("스시", "우메보시", "타코야끼", "단무지", "사케");
-//            case "western" -> Arrays.asList("라따뚜이", "블랙 푸딩", "알리오 올리오", "포케", "피시 앤 칩스");
-//            case "fastfood" -> Arrays.asList("샌드위치", "햄버거", "라면", "떡볶이", "피자");
-//            case "dessert" -> Arrays.asList("버블티", "치즈케이크", "마카롱", "티라미수", "와플");
-//            default -> throw new InvalidCategoryException("Unexpected value: " + category);
-//        };
-
-//
         // user 테이블에서 userId에 해당하는 사용자의 키, 몸무게, 나이, 활동지수(activity_level) 및 매운맛 선호도, 육류 섭취여부, 선호하는 맛, 선호하는 음식 타입, 선호 음식 정보를 가져옴
         DietServiceUserFoodInfo userFoodInfo = entityManager.createQuery(
                         "SELECT new com.example.fitness_trAIner.service.diet.dto.DietServiceUserFoodInfo(" +
@@ -94,21 +76,36 @@ public class DietServiceImp implements DietService{
                 .setParameter("userId", userId)
                 .getSingleResult();
 
+        // diet 테이블에서 userId에 해당하는 사용자의 식단 정보 가져오기, 사용자가 먹은 음식 정보를 가져옴
+        List<Food> eatenFoodList = new ArrayList<>();
+        List<Diet> dietList = dietRepository.findByUserId(userId);
+        if (!dietList.isEmpty()) {
+            for (Diet diet : dietList) {
+                System.out.println("diet: " + diet.getFoodId() + ", " + diet.getEatDate() + ", " + diet.getTotalCalories());
+                Food food = foodRepository.findById(diet.getFoodId()).get();
+                eatenFoodList.add(food);
+            }
+        }
+        for (Food food : eatenFoodList) {
+            System.out.println("eatenFoodList: " + food.getFoodName());
+        }
+
 
         // 사용자의 정보를 파이썬 스크립트에 파라미터로 넘겨주기
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> userData = objectMapper.convertValue(userFoodInfo, Map.class);
         userData.put("matchingFoodList", matchingFoodList);
+        userData.put("eatenFoodList", eatenFoodList);
         String userDataJson = objectMapper.writeValueAsString(userData);
 //        String parameter = userDataJson.replace("\"", "\""); // 파이썬 스크립트에서 사용자 정보를 받을 때 따옴표를 인식하기 위해 따옴표를 이스케이프 처리
 //        for (DietServiceInitialFoodList matchnFood : matchingFoodList) {
 //            System.out.println("matchnFood: " + matchnFood.getFoodName() + ", " + matchnFood.getTaste() + ", " + matchnFood.getMainIngredient() + ", " + matchnFood.getSecondaryIngredient() + ", " + matchnFood.getCookMethod());
 //        }
         System.out.println("userDataJson!: " + userDataJson + "\n");
-//        System.out.println("parameter: " + parameter);
 
         // 파이썬 스크립트에서 사용자의 정보를 바탕으로 사용자에게 맞는 식단 추천 받기, 리눅스는 인자를 공백으로 구분하여 인식
-        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", userDataJson);
+//        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", userDataJson);
+        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", "\""+ userDataJson.replace("\"", "\\\"") + "\"");
         Process process = processBuilder.start();
 
         // 파이썬 스크립트에서 추천된 식단을 받아오기
@@ -184,7 +181,7 @@ public class DietServiceImp implements DietService{
     }
 
     @Override
-    public List<Map> findDietOfDay(Long userId, String dietDate) throws IOException {
+    public List<Map> findDietOfDay(Long userId, String dietDate) {
         // userId가 실재하는지 확인
         if (!userRepository.existsById(userId)) {
             throw new NoUserException("존재하지 않는 사용자");
@@ -288,27 +285,14 @@ public class DietServiceImp implements DietService{
     private double calculateTDEE(User user, double bmr) {
         // TDEE 계산
         int activityLevel = user.getActivityLevel();
-        double tdee;
-
-        switch (activityLevel) {
-            case 1:
-                tdee = bmr * 1.2;
-                break;
-            case 2:
-                tdee = bmr * 1.375;
-                break;
-            case 3:
-                tdee = bmr * 1.55;
-                break;
-            case 4:
-                tdee = bmr * 1.725;
-                break;
-            case 5:
-                tdee = bmr * 1.9;
-                break;
-            default:
-                throw new IllegalArgumentException("올바르지 않은 활동 수준입니다.");
-        }
+        double tdee = switch (activityLevel) {
+            case 1 -> bmr * 1.2;
+            case 2 -> bmr * 1.375;
+            case 3 -> bmr * 1.55;
+            case 4 -> bmr * 1.725;
+            case 5 -> bmr * 1.9;
+            default -> throw new IllegalArgumentException("올바르지 않은 활동 수준입니다.");
+        };
 
         return tdee;
     }

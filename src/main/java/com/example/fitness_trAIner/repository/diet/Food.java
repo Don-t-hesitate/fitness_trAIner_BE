@@ -31,6 +31,9 @@ public class Food implements Comparable<Food> {
     @Column(name = "detail_type", nullable = false)
     private String detailType;
 
+    @Column(name = "serving_size", nullable = false)
+    private Integer servingSize;
+
     @Column(name = "calories", nullable = false)
     private Double calories;
 
@@ -43,6 +46,21 @@ public class Food implements Comparable<Food> {
     @Column(name = "carbohydr", nullable = false)
     private Double carbohydr;
 
+    @Column(name = "sugar")
+    private Double sugar;
+
+    @Column(name = "sodium")
+    private Double sodium;
+
+    @Column(name = "cholesterol")
+    private Double cholesterol;
+
+    @Column(name = "sat_fatty_acid")
+    private Double satFattyAcid;
+
+    @Column(name = "trans_fatty_acid")
+    private Double transFattyAcid;
+
     @Column(name = "taste", nullable = false)
     private String taste;
 
@@ -54,6 +72,9 @@ public class Food implements Comparable<Food> {
 
     @Column(name = "cook_method", nullable = false)
     private String cookingMethod;
+
+    @Column(name = "allergens", nullable = false)
+    private String allergens;
 
     @Override
     public int compareTo(Food other) {

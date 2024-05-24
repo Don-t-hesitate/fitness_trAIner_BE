@@ -36,3 +36,10 @@ out/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/food_db_result_final.xlsx
+/model_params.pkl
+/src/main/resources/temp.xlsx
+/src/main/resources/temp.xlsx.bak
+/conf/maria/init-sql/user.sql
+/conf/maria/init-sql/051_create_food1.sql
+/src/main/resources/food_db_result_final.csv
