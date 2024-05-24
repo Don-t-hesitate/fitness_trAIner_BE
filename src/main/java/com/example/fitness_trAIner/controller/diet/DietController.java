@@ -47,9 +47,9 @@ public class DietController {
     @Operation(summary = "식단 조회", description = "식단 조회 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<List<Map>> findDietOfDay(@PathVariable Long userId, @PathVariable String dietDate) throws IOException {
+    public final GlobalResponse<Map<String, List>> findDietOfDay(@PathVariable Long userId, @PathVariable String dietDate) throws IOException {
 
-        return GlobalResponse.<List<Map>>builder()
+        return GlobalResponse.<Map<String, List>>builder()
                 .message("식단 조회 성공")
                 .result(dietService.findDietOfDay(userId, dietDate))
                 .build();

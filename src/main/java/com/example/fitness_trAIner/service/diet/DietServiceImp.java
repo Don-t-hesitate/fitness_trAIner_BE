@@ -1,5 +1,6 @@
 package com.example.fitness_trAIner.service.diet;
 
+import com.example.fitness_trAIner.common.exception.exceptions.DietException;
 import com.example.fitness_trAIner.common.exception.exceptions.NoUserException;
 import com.example.fitness_trAIner.repository.diet.Diet;
 import com.example.fitness_trAIner.repository.diet.DietRepository;
@@ -104,8 +105,8 @@ public class DietServiceImp implements DietService{
         System.out.println("userDataJson!: " + userDataJson + "\n");
 
         // 파이썬 스크립트에서 사용자의 정보를 바탕으로 사용자에게 맞는 식단 추천 받기, 리눅스는 인자를 공백으로 구분하여 인식
-//        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", userDataJson);
-        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", "\""+ userDataJson.replace("\"", "\\\"") + "\"");
+        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", userDataJson);
+//        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", "\""+ userDataJson.replace("\"", "\\\"") + "\""); //윈도우 용
         Process process = processBuilder.start();
 
         // 파이썬 스크립트에서 추천된 식단을 받아오기
@@ -181,7 +182,7 @@ public class DietServiceImp implements DietService{
     }
 
     @Override
-    public List<Map> findDietOfDay(Long userId, String dietDate) {
+    public Map<String, List> findDietOfDay(Long userId, String dietDate) {
         // userId가 실재하는지 확인
         if (!userRepository.existsById(userId)) {
             throw new NoUserException("존재하지 않는 사용자");
@@ -193,7 +194,7 @@ public class DietServiceImp implements DietService{
 
         //diet 테이블에서 userId와 dietDate에 해당하는 식단 정보를 가져옴
         List<Map> dietList = entityManager.createQuery(
-                "SELECT new map(d.dietId as dietId, d.foodId as foodId, d.eatDate as eatDate, d.totalCalories as totalCalories) " +
+                "SELECT new map(d.foodId as foodId, d.eatDate as eatDate, d.totalCalories as totalCalories) " +
                         "FROM Diet d " +
                         "WHERE d.userId = :userId AND d.eatDate = :dietDate", Map.class)
                 .setParameter("userId", userId)
@@ -208,8 +209,23 @@ public class DietServiceImp implements DietService{
                 .setParameter("foodIdList", dietList.stream().map(diet -> diet.get("foodId")).toList())
                 .getResultList();
 
-        // dietList와 foodList를 각각 dietList: {}, fooodList: {}인 Object로 변환하여 반환
-        return List.of(Map.of("dietList", dietList), Map.of("foodList", foodList));
+        if (dietList.isEmpty()) {
+            throw new DietException("해당 날짜의 식단 정보가 없습니다.");
+        } else {
+            // dietList와 foodList에서 음식 이름과 총 칼로리만 추출하여 반환
+            List<Map<String, Object>> resultList = new ArrayList<>();
+            for (Map diet : dietList) {
+                for (Map food : foodList) {
+                    if (diet.get("foodId").equals(food.get("foodId"))) {
+                        System.out.println("diet: " + diet.get("foodId") + ", " + food.get("foodName") + diet.get("eatDate") + ", " + diet.get("totalCalories"));
+                        resultList.add(Map.of("foodName", food.get("foodName"), "totalCalories", diet.get("totalCalories")));
+
+                    }
+                }
+            }
+//            return Map.of("dietList", dietList, "foodList", foodList);
+            return Map.of("dietList", resultList);
+        }
     }
 
     @Override
@@ -236,7 +252,7 @@ public class DietServiceImp implements DietService{
 
             // foodName이 존재하는지 확인
             if (foodRepository.findByFoodName(dietVO.getFoodName()).getFoodId() == null) {
-                throw new NoUserException("존재하지 않는 음식");
+                throw new DietException("존재하지 않는 음식");
             } else {
                 Food food = foodRepository.findByFoodName(dietVO.getFoodName());
                 // 음식 ID 저장
