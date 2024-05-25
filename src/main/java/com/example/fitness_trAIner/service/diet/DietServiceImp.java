@@ -252,10 +252,16 @@ public class DietServiceImp implements DietService{
 
             // foodName이 존재하는지 확인
 
-            Food food = foodRepository.findByFoodName(dietVO.getFoodName());
-            if (food == null) {
+            List<Food> foods = foodRepository.findByFoodName(dietVO.getFoodName());
+            if (foods.isEmpty()) {
                 throw new DietException("존재하지 않는 음식");
             } else {
+                if (foods.size() > 1) {
+                    for (Food food : foods) {
+                        System.out.println("food: " + food.getFoodName() + ", " + food.getCalories() + ", " + food.getFoodId());
+                    }
+                }
+                Food food = foods.get(0);
                 // 음식 ID 저장
                 diet.setFoodId(food.getFoodId());
                 // 총 칼로리 저장
