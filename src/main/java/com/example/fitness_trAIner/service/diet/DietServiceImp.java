@@ -16,6 +16,7 @@ import com.example.fitness_trAIner.service.diet.dto.request.DietServiceRecommend
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceSaveDayOfUsersRequest;
 import com.example.fitness_trAIner.service.diet.dto.response.DietServiceRecommendResponse;
 import com.example.fitness_trAIner.vos.DietVO;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
@@ -43,6 +44,9 @@ public class DietServiceImp implements DietService{
     private final DietRepository dietRepository;
     private final FoodRepository foodRepository;
     private final UserScoreRepository userScoreRepository;
+
+    @Value("${foodScriptPath}")
+    private String foodScriptPath;
     @Value("${foodpath}")
     private String foodPath;
 
@@ -77,19 +81,91 @@ public class DietServiceImp implements DietService{
                 .setParameter("userId", userId)
                 .getSingleResult();
 
-        // diet 테이블에서 userId에 해당하는 사용자의 식단 정보 가져오기, 사용자가 먹은 음식 정보를 가져옴
+        // 음식 이름으로 음식 정보 가져오는 파이썬 스크립트에 음식 이름 제공
+        List<String> consumedFoodList = request.getConsumedFoodNames();
+        ProcessBuilder foodProcessBuilder = new ProcessBuilder("python", foodScriptPath + File.separator + "daily_food_intake.py", String.join(",", consumedFoodList));
+        // ProcessBuilder foodProcessBuilder = new ProcessBuilder("python", foodScriptPath + File.separator + "daily_food_intake.py", "\""+ String.join(",", consumedFoodList).replace("\"", "\\\"") + "\""); //윈도우 용
+        Process foodProcess = foodProcessBuilder.start();
+
+        // 파이썬 스크립트에서 출력한 결과를 한 줄씩 읽어서 섭취 음식 리스트에 저장
         List<Food> eatenFoodList = new ArrayList<>();
-        List<Diet> dietList = dietRepository.findByUserId(userId);
-        if (!dietList.isEmpty()) {
-            for (Diet diet : dietList) {
-                System.out.println("diet: " + diet.getFoodId() + ", " + diet.getEatDate() + ", " + diet.getTotalCalories());
-                Food food = foodRepository.findById(diet.getFoodId()).get();
-                eatenFoodList.add(food);
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(foodProcess.getInputStream(), StandardCharsets.UTF_8));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(foodProcess.getErrorStream()));
+            String line;
+
+            // 파이썬 스크립트에서 출력한 결과를 한 줄씩 읽어서 리스트에 저장, 한글이 깨지지 않도록 디코딩
+            Charset charset = Charset.forName("UTF-8");
+            CharsetDecoder decoder = charset.newDecoder();
+            List<String> nameResultList = new ArrayList<>();
+
+            while ((line = reader.readLine()) != null) {
+                ByteBuffer byteBuffer = ByteBuffer.wrap(line.getBytes());
+                CharBuffer charBuffer = decoder.decode(byteBuffer);
+                String decodedLine = charBuffer.toString();
+                System.out.println("fd_print: " + decodedLine);
+                nameResultList.add(decodedLine);
             }
+            int exitCode = foodProcess.waitFor();
+            if (exitCode != 0) {
+                List<String> errorList = new ArrayList<>();
+                errorList = errorReader.lines().toList();
+                log.error("음식 리스트 파이썬 스크립트 실행 중 오류 발생: ");
+                // 파이썬의 오류 메세지 다중 출력
+                for (String error : errorList) {
+                    log.error(error);
+                }
+                log.error("error: " + errorReader.readLine());
+                throw new IOException("음식 리스트 파이썬 스크립트 실행 중 오류 발생" + exitCode);
+            }
+            for (String name : nameResultList) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS.mappedFeature());
+                List<Map<String, Object>> map = objectMapper.readValue(name, new TypeReference<List<Map<String, Object>>>() {});
+                for (Map<String, Object> m : map) {
+                    System.out.println("\nmap: " + m.get("name"));
+                    Food food = Food.builder()
+                            .foodId((String) m.get("code"))
+                            .foodName((String) m.get("name"))
+                            .mainType((String) m.get("mainFoodType"))
+                            .detailType((String) m.get("detailedFoodType"))
+                            .servingSize((int) m.get("servingSize"))
+                            .calories((double) m.get("calorie"))
+                            .protein((double) m.get("protein"))
+                            .fat((double) m.get("fat"))
+                            .carbohydr((double) m.get("carbohydrate"))
+                            .sugar((double) m.get("sugar"))
+                            .sodium((double) m.get("sodium"))
+                            .cholesterol((double) m.get("cholesterol"))
+                            .satFattyAcid((double) m.get("saturatedFattyAcid"))
+                            .transFattyAcid((double) m.get("transFattyAcid"))
+                            .taste((String) m.get("taste"))
+                            .mainIngredient((String) m.get("mainIngredient"))
+                            .secondaryIngredient((String) m.get("secondaryIngredient"))
+                            .cookingMethod((String) m.get("cookingMethod"))
+                            .allergens((String) m.get("allergens"))
+                            .build();
+                    eatenFoodList.add(food);
+                }
+            }
+            for (Food food : eatenFoodList) {
+                System.out.println("\neatenFoodList: " + food.getFoodName() + ", " + food.getCalories() + ", " + food.getFoodId() + ", " + food.getMainType() + ", " + food.getDetailType() + ", " + food.getServingSize() + ", " + food.getProtein() + ", " + food.getFat() + ", " + food.getCarbohydr() + ", " + food.getSugar() + ", " + food.getSodium() + ", " + food.getCholesterol() + ", " + food.getSatFattyAcid() + ", " + food.getTransFattyAcid() + ", " + food.getTaste() + ", " + food.getMainIngredient() + ", " + food.getSecondaryIngredient() + ", " + food.getCookingMethod() + ", " + food.getAllergens());
+            }
+        } catch (IOException | InterruptedException e) {
+            log.error("음식 리스트 파이썬 스크립트 출력 읽는 중 오류 발생", e);
+            throw new IOException(e);
         }
+
+        //saveDiet로 eatenFoodList를 저장
         for (Food food : eatenFoodList) {
-            System.out.println("eatenFoodList: " + food.getFoodName());
+            Diet diet = new Diet();
+            diet.setUserId(userId);
+            diet.setEatDate(LocalDate.now());
+            diet.setFoodId(food.getFoodId());
+            diet.setTotalCalories(food.getCalories());
+            dietRepository.save(diet);
         }
+
 
 
         // 사용자의 정보를 파이썬 스크립트에 파라미터로 넘겨주기
@@ -98,15 +174,11 @@ public class DietServiceImp implements DietService{
         userData.put("matchingFoodList", matchingFoodList);
         userData.put("eatenFoodList", eatenFoodList);
         String userDataJson = objectMapper.writeValueAsString(userData);
-//        String parameter = userDataJson.replace("\"", "\""); // 파이썬 스크립트에서 사용자 정보를 받을 때 따옴표를 인식하기 위해 따옴표를 이스케이프 처리
-//        for (DietServiceInitialFoodList matchnFood : matchingFoodList) {
-//            System.out.println("matchnFood: " + matchnFood.getFoodName() + ", " + matchnFood.getTaste() + ", " + matchnFood.getMainIngredient() + ", " + matchnFood.getSecondaryIngredient() + ", " + matchnFood.getCookMethod());
-//        }
-        System.out.println("userDataJson!: " + userDataJson + "\n");
+        System.out.println("\nuserDataJson: " + userDataJson + "\n");
 
         // 파이썬 스크립트에서 사용자의 정보를 바탕으로 사용자에게 맞는 식단 추천 받기, 리눅스는 인자를 공백으로 구분하여 인식
-        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", userDataJson);
-//        ProcessBuilder processBuilder = new ProcessBuilder("python", foodPath + File.separator + "food_recommend.py", "\""+ userDataJson.replace("\"", "\\\"") + "\""); //윈도우 용
+        ProcessBuilder processBuilder = new ProcessBuilder("python", foodScriptPath + File.separator + "food_recommend.py", userDataJson);
+//        ProcessBuilder processBuilder = new ProcessBuilder("python", foodScriptPath + File.separator + "food_recommend.py", "\""+ userDataJson.replace("\"", "\\\"") + "\""); //윈도우 용
         Process process = processBuilder.start();
 
         // 파이썬 스크립트에서 추천된 식단을 받아오기
@@ -124,29 +196,25 @@ public class DietServiceImp implements DietService{
                 ByteBuffer byteBuffer = ByteBuffer.wrap(line.getBytes());
                 CharBuffer charBuffer = decoder.decode(byteBuffer);
                 String decodedLine = charBuffer.toString();
-                System.out.println("decodedLine: " + decodedLine);
+                System.out.println("recom_print: " + decodedLine + "\n");
                 foodResultList.add(decodedLine.replace("\\", ""));
             }
             int exitCode = process.waitFor();
             if (exitCode != 0) {
                 List<String> errorList = new ArrayList<>();
                 errorList = errorReader.lines().toList();
-                log.error("파이썬 스크립트 실행 중 오류 발생: ");
+                log.error("음식 추천 파이썬 스크립트 실행 중 오류 발생: ");
                 // 파이썬의 오류 메세지 다중 출력
                 for (String error : errorList) {
                     log.error(error);
                 }
                 log.error("error: " + errorReader.readLine());
                 reader.close(); errorReader.close();
-                throw new IOException("파이썬 스크립트 실행 중 오류 발생" + exitCode + " " + errorReader.readLine());
+                throw new IOException("음식 추천 파이썬 스크립트 실행 중 오류 발생" + exitCode + " " + errorReader.readLine());
             }
         } catch (IOException | InterruptedException e) {
-            log.error("파이썬 스크립트 출력 읽는 중 오류 발생", e);
+            log.error("음식 추천 파이썬 스크립트 출력 읽는 중 오류 발생", e);
             throw new IOException(e);
-        }
-
-        for (String food : foodResultList) {
-            System.out.println("food: " + food);
         }
 
         List<Map<String, Object>> foodResultMapList = objectMapper.readValue(String.join("", foodResultList), new TypeReference<List<Map<String, Object>>>() {});
@@ -223,7 +291,6 @@ public class DietServiceImp implements DietService{
                     }
                 }
             }
-//            return Map.of("dietList", dietList, "foodList", foodList);
             return Map.of("dietList", resultList);
         }
     }
@@ -274,6 +341,30 @@ public class DietServiceImp implements DietService{
         }
 
         return "식단 저장 성공";
+    }
+
+    @Override
+    public String saveRecommendDiet(DietServiceRecommendRequest requestBody) {
+        // userId가 실재하는지 확인
+        Long userId = Optional.ofNullable(requestBody.getUserId()).orElseThrow(() -> new NoUserException("유저 아이디가 필요합니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NoUserException("존재하지 않는 사용자"));
+
+        // 사용자가 선택한 음식이 없을 경우 예외 처리
+        if (requestBody.getConsumedFoodNames().isEmpty()) {
+            throw new DietException("선택된 음식이 없습니다.");
+        }
+
+        // 선택한 음식을 user 테이블의 preferenceFoods에 저장
+        String existingPreferenceFoods = user.getPreferenceFoods();
+
+        List<String> newPreferenceFoods = new ArrayList<>(Arrays.asList(existingPreferenceFoods.split(",")));
+        newPreferenceFoods.addAll(requestBody.getConsumedFoodNames());
+
+        user.setPreferenceFoods(String.join(",", newPreferenceFoods));
+
+        userRepository.save(user);
+
+        return "선택된 식단 추천 결과 저장 성공";
     }
 
     private int calculateDietScore(User user, double totalCalories) {
