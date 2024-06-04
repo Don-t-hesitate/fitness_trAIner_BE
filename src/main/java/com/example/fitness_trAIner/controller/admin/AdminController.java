@@ -207,4 +207,22 @@ public class AdminController {
                 .result(adminService.deleteWorkoutVideo(wokroutVideoId))
                 .build();
     }
+
+    @GetMapping("/app")
+    @Operation(summary = "앱 다운로드", description = "앱 다운로드")
+    @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = Resource.class)))
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public ResponseEntity<Resource> getApp() throws IOException {
+        byte[] bytes = adminService.getApp();
+        InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(bytes));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=trAIner.apk");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(bytes.length)
+                .contentType(MediaType.parseMediaType("application/vnd.android.package-archive"))
+                .body(resource);
+    }
 }

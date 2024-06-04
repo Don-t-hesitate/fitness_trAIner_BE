@@ -47,6 +47,8 @@ public class AdminServiceImp implements AdminService{
 
     @Value("${foodpath}")
     private String excelPath;
+    @Value("${apkpath}")
+    private String appPath;
 
     @Override
     public AdminServiceLoginResponse loginAdmin(AdminServiceLoginRequest request) {
@@ -300,35 +302,6 @@ public class AdminServiceImp implements AdminService{
         return data;
     }
 
-//    private List<Food> readExcelData(String filePath) throws IOException {
-//        System.out.println("파일 읽기 시작");
-//        List<Food> data = new ArrayList<>();
-//        try (FileInputStream file = new FileInputStream(new File(filePath))) {
-//            Workbook workbook = new XSSFWorkbook(file);
-//            Sheet sheet = workbook.getSheetAt(0);
-//
-//            System.out.println("파일 읽기 중");
-//            for (Row row : sheet) {
-//                // 첫 번째 행은 헤더이므로 skip
-//                if (row.getRowNum() == 0) {
-//                    continue;
-//                }
-//                Row dataRow = sheet.getRow(row.getRowNum());
-//                System.out.println("현재 row 수: " + row.getRowNum());
-//                Food food = mapRowToFood(dataRow);
-//                data.add(food);
-//            }
-//
-//            workbook.close();
-//            file.close();
-//            System.out.println("파일 읽기 끝");
-//        } catch (IOException e) {
-//            throw new FileStoreException("엑셀 파일 읽기 중 오류 발생");
-//        }
-//
-//        return data;
-//    }
-
     private Food mapRowToFood(Row row) {
         double calories = 0;
         double protein = 0;
@@ -410,6 +383,33 @@ public class AdminServiceImp implements AdminService{
         workoutVideoRepository.deleteById(workoutVideo.getWorkoutVideoId());
 
         return "영상 삭제 성공";
+    }
+
+    @Override
+    public byte[] getApp() throws IOException {
+        File file = new File(appPath);
+        InputStream inputStream = null;
+
+        // file 디렉터리 아래의 파일 중 .apk 확장자를 가진 파일을 찾아서 inputStream에 저장
+        for (File f : file.listFiles()) {
+            if (f.getName().endsWith(".apk")) {
+                try {
+                    inputStream = new FileInputStream(f);
+                } catch (FileNotFoundException e) {
+                    throw new FileStoreException("앱 파일 읽기 실패");
+                }
+            }
+        }
+        if (inputStream == null) {
+            throw new FileStoreException("앱 파일 없음");
+        }
+
+        // inputStream을 byte[]로 변환
+        byte[] appFile = null;
+        appFile = IOUtils.toByteArray(inputStream);
+        inputStream.close();
+
+        return appFile;
     }
 
 }

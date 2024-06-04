@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/static/css/main.dc1ce372.css",
-    "main.js": "/static/js/main.c1c864ad.js",
+    "main.js": "/static/js/main.95eefa73.js",
     "static/js/206.f8819006.chunk.js": "/static/js/206.f8819006.chunk.js",
     "static/media/GmarketSansBold.otf": "/static/media/GmarketSansBold.03ceab7804dad3e86672.otf",
     "index.html": "/index.html"
   },
   "entrypoints": [
     "static/css/main.dc1ce372.css",
-    "static/js/main.c1c864ad.js"
+    "static/js/main.95eefa73.js"
   ]
 }
