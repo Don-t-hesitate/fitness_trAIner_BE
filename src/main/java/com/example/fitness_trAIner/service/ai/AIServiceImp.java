@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -65,7 +66,7 @@ public class AIServiceImp implements AIService{
         processBuilder.command("python", workoutPath, replaceData);
         Process process  = processBuilder.start();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
         StringBuilder result = new StringBuilder();
 
         String line;
@@ -89,12 +90,10 @@ public class AIServiceImp implements AIService{
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonResult);
 
-        int perfect = jsonNode.get("perfect").asInt();
-        int good = jsonNode.get("good").asInt();
-        int bad = jsonNode.get("bad").asInt();
 
+        System.out.println(jsonResult);
         List<String> feedbackList = new ArrayList<>();
-        JsonNode feedbackNode = jsonNode.get("feedback");
+        JsonNode feedbackNode = jsonNode.get("피드백");
         if (feedbackNode != null && feedbackNode.isArray()) {
             for (JsonNode node : feedbackNode) {
                 feedbackList.add(node.asText());
@@ -102,9 +101,6 @@ public class AIServiceImp implements AIService{
         }
 
         return AIServiceResponse.builder()
-                .perfect(perfect)
-                .good(good)
-                .bad(bad)
                 .feedback(feedbackList)
                 .build();
 

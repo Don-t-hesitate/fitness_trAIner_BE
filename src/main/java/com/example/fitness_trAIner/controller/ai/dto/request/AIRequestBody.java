@@ -12,5 +12,6 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 public class AIRequestBody {
-    List<PositionVO> positionList;
+    private String workoutName;
+    private List<List<Integer>> workoutResultIndexList;
 }
