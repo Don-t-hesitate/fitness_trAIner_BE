@@ -58,12 +58,12 @@ public class AIServiceImp implements AIService{
   
     @Override
     public AIServiceResponse pythonProcess(String data) throws IOException {
-        String replaceData = data.replace("\"", "\\\"");
+//        String replaceData = data.replace("\"", "\\\"");
 
 
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("python", workoutPath, replaceData);
+        processBuilder.command("python", workoutPath, data);
         Process process  = processBuilder.start();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
