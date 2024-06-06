@@ -39,17 +39,12 @@ public class AIController {
 
     private final AIService aiService;
 
-    @PostMapping
-    @Operation(summary = "AI데이터 전송", description = "사람의 각 부위의 포지션 전달")
+    @PostMapping("/feedback")
+    @Operation(summary = "피드백 인덱스 전송", description = "피드백 보여주기")
     @ApiResponse(responseCode = "200", description = "성공", content = @Content(schema = @Schema(implementation = AIServiceResponse.class)))
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     public final GlobalResponse<AIServiceResponse> sendAIData(@RequestBody AIRequestBody data) throws IOException {
-        String exerciseName = new String();
-        if(!data.getPositionList().isEmpty()) {
-            PositionVO firstData = data.getPositionList().get(0);
-            exerciseName = firstData.getWorkoutName();
-        }
-//        System.out.println("운동이름" + exerciseName);
+
 
         ObjectMapper objectMapper = new ObjectMapper();
         String json = new String();
@@ -62,7 +57,7 @@ public class AIController {
         }
 
         return GlobalResponse.<AIServiceResponse>builder()
-                .message("AI데이터 전송")
+                .message("피드백 제공")
                 .result(aiService.pythonProcess(json))
                 .build();
     }

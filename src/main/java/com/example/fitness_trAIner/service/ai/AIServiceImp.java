@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -54,15 +55,15 @@ public class AIServiceImp implements AIService{
   
     @Override
     public AIServiceResponse pythonProcess(String data) throws IOException {
-        String replaceData = data.replace("\"", "\\\"");
+//        String replaceData = data.replace("\"", "\\\"");
 
 
 
         ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("python", workoutPath, replaceData);
+        processBuilder.command("python", workoutPath, data);
         Process process  = processBuilder.start();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
         StringBuilder result = new StringBuilder();
 
         String line;
@@ -86,12 +87,9 @@ public class AIServiceImp implements AIService{
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(jsonResult);
 
-        int perfect = jsonNode.get("perfect").asInt();
-        int good = jsonNode.get("good").asInt();
-        int bad = jsonNode.get("bad").asInt();
 
         List<String> feedbackList = new ArrayList<>();
-        JsonNode feedbackNode = jsonNode.get("feedback");
+        JsonNode feedbackNode = jsonNode.get("피드백");
         if (feedbackNode != null && feedbackNode.isArray()) {
             for (JsonNode node : feedbackNode) {
                 feedbackList.add(node.asText());
@@ -99,9 +97,6 @@ public class AIServiceImp implements AIService{
         }
 
         return AIServiceResponse.builder()
-                .perfect(perfect)
-                .good(good)
-                .bad(bad)
                 .feedback(feedbackList)
                 .build();
 
