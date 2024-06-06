@@ -23,4 +23,5 @@ public interface AdminService {
     public AdminServiceFindWorkoutVideoListResponse findWorkoutVideoList();
     public String deleteWorkoutVideo(Long wokroutVideoId);
 
+    byte[] getApp() throws IOException;
 }

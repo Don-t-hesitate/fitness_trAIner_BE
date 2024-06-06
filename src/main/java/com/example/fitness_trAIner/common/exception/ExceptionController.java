@@ -66,10 +66,10 @@ public class ExceptionController {
         return makeResponse(e.getMessage(), ErrorCode.FILESTORE_ERROR.getCode());
     }
 
-    @ExceptionHandler({InvalidCategoryException.class})
+    @ExceptionHandler({DietException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public final GlobalExceptionResponse invalidCategoryException(final InvalidCategoryException e) {
-        log.error("유효하지 않은 카테고리", e);
+    public final GlobalExceptionResponse dietException(final DietException e) {
+        log.error("식단 관련 오류", e);
         return makeResponse(e.getMessage(), ErrorCode.DIET_ERROR.getCode());
     }
 

@@ -13,13 +13,11 @@ import com.google.gson.JsonPrimitive;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.multipart.MultipartFile;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.ProcessResult;
@@ -30,7 +28,6 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -244,17 +241,26 @@ public class AIServiceImp implements AIService{
         System.out.println("pythonFilePath: " + pythonFilePath);
         System.out.println("params: " + params);
         System.out.println("exerciseName: " + exerciseName);
-        // params에 있는 파일명에 exerciseAiPath를 추가
-        String[] words = params.split(" ");
-        for (int i = 0; i < words.length; i++) {
-            if (words[i].contains(".json")) {
-                words[i] = exerciseAiPath + "/" + exerciseName + "/" + words[i];
-                break;
-            }
+//        // params에 있는 파일명에 exerciseAiPath를 추가
+//        String[] words = params.split(" ");
+//        for (int i = 0; i < words.length; i++) {
+//            if (words[i].contains(".json")) {
+//                words[i] = exerciseAiPath + "/" + exerciseName + "/" + words[i];
+//                break;
+//            }
+//        }
+//        params = String.join(" ", words);
+        ObjectMapper objectMapper = new ObjectMapper();
+        // params에 있는 따옴표 제거
+        if (params.startsWith("\"") && params.endsWith("\"")) {
+            params = params.substring(1, params.length() - 1);
+            params = params.replace("\\\"", "\"");
         }
-        params = String.join(" ", words);
+        Map<String, Object> paramsMap = objectMapper.readValue(params, Map.class);
+        String paramsJson = objectMapper.writeValueAsString(paramsMap);
 
-        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath, params)
+
+        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath, paramsJson)
 //        ProcessResult exitCode = new ProcessExecutor().command("python", pythonFilePath)
                 .redirectOutput(new LogOutputStream() {
                     @Override
@@ -291,17 +297,15 @@ public class AIServiceImp implements AIService{
     @Override
     public Map<String, List<String>> getModelInfo(String exerciseName) {
         File directory = new File(exerciseAiPath+ File.separator + exerciseName);
-//        System.out.println("file: " + directory.getAbsolutePath());
         if (!directory.exists() || !directory.isDirectory()) { // 디렉토리가 존재 확인 및 디렉토리인지 확인
             throw new EmptyDirectoryException("디렉토리가 존재하지 않습니다.");
         }
 
         // 파일 이름 조회
-//        File[] files = directory.listFiles();
         List<File> files = new ArrayList<>();
         List<File> directories = new ArrayList<>();
         for (File file : directory.listFiles()) {
-            if (file.isFile()) {
+            if (file.isFile() && file.getName().contains(".json")) {
                 files.add(file);
             } else {
                 directories.add(file);
@@ -312,7 +316,7 @@ public class AIServiceImp implements AIService{
             throw new EmptyDirectoryException("파일이 없습니다.");
         }
 
-//        System.out.println("files: " + files);
+        // 파일 이름을 키로, 파일 내용을 값으로 하는 맵 생성
         Map<String, List<String>> result = new HashMap<>();
         for (File file : directories) {
             if (file.getName().equals("Inuse")) {
@@ -353,55 +357,56 @@ public class AIServiceImp implements AIService{
     public Map<String, Object> loadModelParams(String parentPath ,String fileName) {
         try (Reader reader = new FileReader(parentPath + File.separator + fileName)) {
             Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
-
             Map<String, Object> modelParams = new HashMap<>();
-            for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-                String key = entry.getKey();
-                JsonElement value = entry.getValue();
-                if (value.isJsonPrimitive()) {
-                    JsonPrimitive primitive = value.getAsJsonPrimitive();
-                    if (primitive.isNumber()) {
-                        modelParams.put(key, primitive.getAsDouble());
-                    } else if (primitive.isBoolean()) {
-                        modelParams.put(key, primitive.getAsBoolean());
-                    } else {
-                        modelParams.put(key, primitive.getAsString());
-                    }
-                } else if (value.isJsonArray()) {
-                    // JSON 배열 처리: 각 요소를 리스트에 추가하고, 해당 리스트를 modelParams에 추가
-                    List<Object> list = new ArrayList<>();
-                    for (JsonElement element : value.getAsJsonArray()) {
-                        if (element.isJsonPrimitive()) {
-                            JsonPrimitive primitive = element.getAsJsonPrimitive();
-                            if (primitive.isNumber()) {
-                                list.add(primitive.getAsDouble());
-                            } else if (primitive.isBoolean()) {
-                                list.add(primitive.getAsBoolean());
-                            } else {
-                                list.add(primitive.getAsString());
+            if (fileName.contains(".json")) {
+                JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
+                for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+                    String key = entry.getKey();
+                    JsonElement value = entry.getValue();
+                    if (value.isJsonPrimitive()) {
+                        JsonPrimitive primitive = value.getAsJsonPrimitive();
+                        if (primitive.isNumber()) {
+                            modelParams.put(key, primitive.getAsDouble());
+                        } else if (primitive.isBoolean()) {
+                            modelParams.put(key, primitive.getAsBoolean());
+                        } else {
+                            modelParams.put(key, primitive.getAsString());
+                        }
+                    } else if (value.isJsonArray()) {
+                        // JSON 배열 처리: 각 요소를 리스트에 추가하고, 해당 리스트를 modelParams에 추가
+                        List<Object> list = new ArrayList<>();
+                        for (JsonElement element : value.getAsJsonArray()) {
+                            if (element.isJsonPrimitive()) {
+                                JsonPrimitive primitive = element.getAsJsonPrimitive();
+                                if (primitive.isNumber()) {
+                                    list.add(primitive.getAsDouble());
+                                } else if (primitive.isBoolean()) {
+                                    list.add(primitive.getAsBoolean());
+                                } else {
+                                    list.add(primitive.getAsString());
+                                }
                             }
                         }
-                    }
-                    modelParams.put(key, list);
-                } else if (value.isJsonObject()) {
-                    // JSON 객체 처리 로직: 재귀적으로 같은 로직을 적용하여 내부의 모든 값을 추출하고, 이를 modelParams에 추가
-                    Map<String, Object> nestedParams = new HashMap<>();
-                    for (Map.Entry<String, JsonElement> nestedEntry : value.getAsJsonObject().entrySet()) {
-                        String nestedKey = nestedEntry.getKey();
-                        JsonElement nestedValue = nestedEntry.getValue();
-                        if (nestedValue.isJsonPrimitive()) {
-                            JsonPrimitive primitive = nestedValue.getAsJsonPrimitive();
-                            if (primitive.isNumber()) {
-                                nestedParams.put(nestedKey, primitive.getAsDouble());
-                            } else if (primitive.isBoolean()) {
-                                nestedParams.put(nestedKey, primitive.getAsBoolean());
-                            } else {
-                                nestedParams.put(nestedKey, primitive.getAsString());
+                        modelParams.put(key, list);
+                    } else if (value.isJsonObject()) {
+                        // JSON 객체 처리 로직: 재귀적으로 같은 로직을 적용하여 내부의 모든 값을 추출하고, 이를 modelParams에 추가
+                        Map<String, Object> nestedParams = new HashMap<>();
+                        for (Map.Entry<String, JsonElement> nestedEntry : value.getAsJsonObject().entrySet()) {
+                            String nestedKey = nestedEntry.getKey();
+                            JsonElement nestedValue = nestedEntry.getValue();
+                            if (nestedValue.isJsonPrimitive()) {
+                                JsonPrimitive primitive = nestedValue.getAsJsonPrimitive();
+                                if (primitive.isNumber()) {
+                                    nestedParams.put(nestedKey, primitive.getAsDouble());
+                                } else if (primitive.isBoolean()) {
+                                    nestedParams.put(nestedKey, primitive.getAsBoolean());
+                                } else {
+                                    nestedParams.put(nestedKey, primitive.getAsString());
+                                }
                             }
                         }
+                        modelParams.put(key, nestedParams);
                     }
-                    modelParams.put(key, nestedParams);
                 }
             }
 
@@ -415,7 +420,6 @@ public class AIServiceImp implements AIService{
     @Override
     public Map<String, Object> getModelDetail(String exerciseName, String modelVersion) {
         File directory = new File(exerciseAiPath + File.separator + exerciseName);
-        System.out.println("file: " + directory.getAbsolutePath());
         if (!directory.exists()) {
             throw new EmptyDirectoryException("디렉토리가 존재하지 않습니다.");
         }
@@ -441,16 +445,19 @@ public class AIServiceImp implements AIService{
         result.put("modelVersion", modelVersion);
 
         // directory의 파일 중 modelVersion으로 시작하는 파일 찾기
-        Pattern versionPattern = Pattern.compile("ver-?(\\d+(?:\\.\\d+)*)"); // 버전 번호를 추출하는 정규식 패턴
+        Pattern versionPattern = Pattern.compile("training_results_v?(\\d+(?:\\.\\d+)*)"); // 버전 번호를 추출하는 정규식 패턴
 
         File modelFile = null;
         long createdTime = 0;
 
         for (File file : files) {
+            // 파일 이름에서 버전 번호 추출
             String fileName = file.getName();
             Matcher matcher = versionPattern.matcher(fileName);
 
+            // 파일 이름에 버전 번호가 포함되어 있으면 해당 파일을 선택
             if (matcher.find()) {
+                System.out.println("fileName: " + fileName);
                 String version = matcher.group(1);
                 System.out.println("version: " + version);
                 if (version.equals(modelVersion)) {
@@ -466,7 +473,6 @@ public class AIServiceImp implements AIService{
 
                         if (subMatcher.find()) {
                             String version = subMatcher.group(1);
-                            System.out.println("version: " + version);
                             if (version.equals(modelVersion)) {
                                 modelFile = subFile;
                                 createdTime = subFile.lastModified();
@@ -501,7 +507,6 @@ public class AIServiceImp implements AIService{
 
     @Override
     public String applyModel(String exerciseName, String modelVersion, String params) {
-        String[] words = params.split(" ");
 
         // 모델을 Inuse 디렉터리로 이동
         File directory = new File(exerciseAiPath + File.separator + exerciseName);
@@ -614,5 +619,46 @@ public class AIServiceImp implements AIService{
         }
 
         return "모델 삭제 성공";
+    }
+
+    @Override
+    public ResponseEntity<byte[]> downloadModel(String exerciseName, String exerciseVersion, ByteArrayOutputStream baos) {
+        File directory = new File(exerciseAiPath + File.separator + exerciseName);
+        if (Objects.equals(exerciseName, "push_up")) {
+            exerciseName = "pushup";
+        }
+
+        if (!directory.exists()) {
+            throw new EmptyDirectoryException("디렉토리가 존재하지 않습니다.");
+        }
+
+        File[] files = directory.listFiles();
+        if (files == null || files.length == 0) {
+            throw new EmptyDirectoryException("디렉터리에 파일이 없습니다.");
+        }
+
+        File modelFile = null;
+        System.out.println("finding: " + exerciseName + "_model_multiview_v" + exerciseVersion + ".tflite");
+        for (File file : files) {
+            if (file.getName().equals(exerciseName + "_model_multiview_v" + exerciseVersion + ".tflite")) {
+                System.out.println("found: " + file.getName());
+                modelFile = file;
+                break;
+            }
+        }
+
+        if (modelFile == null) {
+            throw new EmptyDirectoryException("모델 버전 파일을 찾을 수 없습니다.");
+        }
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(baos)) {
+            addFileToZip(zipOutputStream, modelFile, "");
+        } catch (IOException e) {
+            throw new FileStoreException("모델 파일 압축 실패: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=" + exerciseName + "_model_multiview_v" + exerciseVersion + ".zip")
+                .body(baos.toByteArray());
     }
 }

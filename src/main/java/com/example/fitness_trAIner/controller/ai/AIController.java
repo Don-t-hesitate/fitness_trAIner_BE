@@ -229,4 +229,21 @@ public class AIController {
             throw new RuntimeException(e);
         }
     }
+
+    @GetMapping(path = "/exercise/download/{exerciseName}/{exerciseVersion}")
+    @Operation(summary = "운동 AI 모델 다운로드", description = "운동 AI 모델 다운로드")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final ResponseEntity<byte[]> downloadExerciseModel(@PathVariable String exerciseName, @PathVariable String exerciseVersion) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        aiService.downloadModel(exerciseName, exerciseVersion, baos);
+        byte[] zipBytes = baos.toByteArray();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "files.zip");
+        headers.setContentLength(zipBytes.length);
+
+        return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
+    }
 }

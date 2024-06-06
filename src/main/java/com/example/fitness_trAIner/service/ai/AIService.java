@@ -2,8 +2,8 @@ package com.example.fitness_trAIner.service.ai;
 
 
 
-import jakarta.servlet.http.HttpServletResponse;
 import com.example.fitness_trAIner.service.ai.dto.response.AIServiceResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
@@ -28,4 +28,5 @@ public interface AIService {
     public String applyModel(String exerciseName, String modelVersion, String params) throws Exception;
     public String deleteModel(String exerciseName, String modelVersion) ;
 
+    ResponseEntity<byte[]> downloadModel(String exerciseName, String exerciseVersion, ByteArrayOutputStream baos);
 }

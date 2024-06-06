@@ -10,6 +10,7 @@ import java.util.Map;
 
 public interface DietService {
     DietServiceRecommendResponse recommendDiet(DietServiceRecommendRequest request) throws IOException;
-    List<Map> findDietOfDay(Long userId, String dietDate) throws IOException;
+    Map<String, List> findDietOfDay(Long userId, String dietDate);
     String saveDiet(DietServiceSaveDayOfUsersRequest requestBody);
+    String saveRecommendDiet(DietServiceRecommendRequest requestBody);
 }

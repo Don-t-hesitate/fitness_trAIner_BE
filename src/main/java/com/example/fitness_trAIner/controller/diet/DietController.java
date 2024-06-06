@@ -2,6 +2,7 @@ package com.example.fitness_trAIner.controller.diet;
 
 import com.example.fitness_trAIner.common.response.GlobalExceptionResponse;
 import com.example.fitness_trAIner.common.response.GlobalResponse;
+import com.example.fitness_trAIner.controller.diet.dto.request.DietRecommendRequestBody;
 import com.example.fitness_trAIner.controller.diet.dto.request.DietSaveDayOfUsersRequestBody;
 import com.example.fitness_trAIner.service.diet.DietService;
 import com.example.fitness_trAIner.service.diet.dto.request.DietServiceSaveDayOfUsersRequest;
@@ -27,17 +28,18 @@ public class DietController {
 
     private final DietService dietService;
 
-    @GetMapping("/{userId}")
-    @Operation(summary = "식단 추천 받기", description = "사용자 ID로 DB를 조회, 선호 음식 5가지를 바탕으로 식단 추천")
+    @PostMapping
+    @Operation(summary = "식단 추천 받기", description = "최초 선호 음식과 사용자가 기존에 받은 추천 음식을 기반한 식단 추천<br>음식 이름 리스트를 서버에 제공하면 해당 음식을 찾아서 식단 테이블에 저장")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<DietServiceRecommendResponse> getRecommendedDiet(@PathVariable Long userId) throws IOException {
+    public final GlobalResponse<DietServiceRecommendResponse> getRecommendedDiet(@RequestBody DietRecommendRequestBody requestBody) throws IOException {
 
 
         return GlobalResponse.<DietServiceRecommendResponse>builder()
                 .message("식단 추천 성공")
                 .result(dietService.recommendDiet(DietServiceRecommendRequest.builder()
-                        .userId(userId)
+                        .userId(requestBody.getUserId())
+                        .consumedFoodNames(requestBody.getConsumedFoodNames())
                         .build()))
                 .build();
 
@@ -47,24 +49,39 @@ public class DietController {
     @Operation(summary = "식단 조회", description = "식단 조회 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<List<Map>> findDietOfDay(@PathVariable Long userId, @PathVariable String dietDate) throws IOException {
+    public final GlobalResponse<Map<String, List>> findDietOfDay(@PathVariable Long userId, @PathVariable String dietDate) {
 
-        return GlobalResponse.<List<Map>>builder()
+        return GlobalResponse.<Map<String, List>>builder()
                 .message("식단 조회 성공")
                 .result(dietService.findDietOfDay(userId, dietDate))
                 .build();
     }
 
     @PostMapping("/{userId}")
-    @Operation(summary = "식단 저장", description = "식단 저장 API")
+    @Operation(summary = "식단 저장(식단 추천 미실행 시)", description = "식단 추천 이외의 식단 저장 API")
     @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
     @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
-    public final GlobalResponse<String> saveDiet(@RequestBody DietSaveDayOfUsersRequestBody requestBody) throws IOException {
+    public final GlobalResponse<String> saveDiet(@RequestBody DietSaveDayOfUsersRequestBody requestBody) {
 
         return GlobalResponse.<String>builder()
                 .message("식단 저장 성공")
                 .result(dietService.saveDiet(DietServiceSaveDayOfUsersRequest.builder()
                         .dietList(requestBody.getDietList())
+                        .build()))
+                .build();
+    }
+
+    @PostMapping("/select")
+    @Operation(summary = "선택된 식단 추천 결과 저장", description = "선택된 식단 추천 결과를 user 테이블의 preference_foods에 저장")
+    @ApiResponse(responseCode = "200", description = "성공", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "400", description = "에러 발생", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    public final GlobalResponse<String> saveRecommendedDiet(@RequestBody DietRecommendRequestBody requestBody) {
+
+        return GlobalResponse.<String>builder()
+                .message("식단 저장 성공")
+                .result(dietService.saveRecommendDiet(DietServiceRecommendRequest.builder()
+                        .userId(requestBody.getUserId())
+                        .consumedFoodNames(requestBody.getConsumedFoodNames())
                         .build()))
                 .build();
     }
