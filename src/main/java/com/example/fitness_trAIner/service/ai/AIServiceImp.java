@@ -91,7 +91,6 @@ public class AIServiceImp implements AIService{
         JsonNode jsonNode = objectMapper.readTree(jsonResult);
 
 
-        System.out.println(jsonResult);
         List<String> feedbackList = new ArrayList<>();
         JsonNode feedbackNode = jsonNode.get("피드백");
         if (feedbackNode != null && feedbackNode.isArray()) {
